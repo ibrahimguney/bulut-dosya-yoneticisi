@@ -1,4 +1,4 @@
-# Kullanım
+# Kullanım Rehberi
 
 Bu bölümde projeyi nasıl çalıştıracağımızı ve farklı ortamlarda nasıl kullanacağımızı öğreneceğiz.
 
