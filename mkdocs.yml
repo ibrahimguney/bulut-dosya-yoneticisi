@@ -1,8 +1,18 @@
-site_name: Öğretici Paket
+site_name: Web Proje Öğrenme Alanı
+site_description: GitHub, GitHub Pages, MkDocs ve temel web proje yapısını öğrenmek için uygulamalı dokümantasyon sitesi.
 repo_url: https://github.com/ibrahimguney/web-proje
+repo_name: ibrahimguney/web-proje
+
 theme:
   name: material
+  language: tr
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+
 nav:
   - Ana Sayfa: index.md
-  - Kurulum: installation.md
-  - Kullanım: usage.md
+  - Başlangıç:
+      - Kurulum: installation.md
+      - Kullanım: usage.md
