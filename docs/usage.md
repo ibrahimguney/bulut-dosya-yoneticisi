@@ -10,3 +10,6 @@ from tutorial_package import hello
 
 hello("İZÜ")
 ```
+## Yeni eklenen bölüm
+
+Bu bölüm branch üzerinde test amaçlı eklendi.
