@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bulut Dosya Yöneticisi</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img">
+              <path d="M7.2 18.5h10.2a4.1 4.1 0 0 0 .7-8.2 6.2 6.2 0 0 0-11.8-1.8 5 5 0 0 0 .9 10Z" />
+            </svg>
+          </div>
+          <div>
+            <strong>Bulut Alanı</strong>
+            <span>Dosya yönetimi</span>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="Klasörler">
+          <button class="nav-item active" data-folder="all" type="button">
+            <span class="nav-icon">⌂</span>
+            Tüm dosyalar
+          </button>
+          <button class="nav-item" data-folder="documents" type="button">
+            <span class="nav-icon">▤</span>
+            Belgeler
+          </button>
+          <button class="nav-item" data-folder="images" type="button">
+            <span class="nav-icon">◩</span>
+            Görseller
+          </button>
+          <button class="nav-item" data-folder="shared" type="button">
+            <span class="nav-icon">↗</span>
+            Paylaşılanlar
+          </button>
+        </nav>
+
+        <div class="storage-panel">
+          <div class="storage-head">
+            <span>Depolama</span>
+            <strong id="storagePercent">0%</strong>
+          </div>
+          <div class="meter" aria-hidden="true">
+            <span id="storageMeter"></span>
+          </div>
+          <p id="storageText">0 MB / 100 MB</p>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Yerel prototip</p>
+            <h1>Bulut Dosya Yöneticisi</h1>
+          </div>
+          <div class="account">
+            <span id="accountName">ibrahim@example.com</span>
+            <button class="icon-button" id="signOutButton" type="button" title="Oturumu kapat" aria-label="Oturumu kapat">⏻</button>
+          </div>
+        </header>
+
+        <section class="auth-view" id="authView" hidden>
+          <form class="auth-panel" id="authForm">
+            <p class="eyebrow">Hesap</p>
+            <h2>Bulut alanına giriş</h2>
+            <label>
+              E-posta
+              <input id="emailInput" type="email" value="ibrahim@example.com" required />
+            </label>
+            <label>
+              Şifre
+              <input id="passwordInput" type="password" value="123456" minlength="6" required />
+            </label>
+            <button class="primary-button" type="submit">Giriş yap</button>
+          </form>
+        </section>
+
+        <section class="dashboard" id="dashboard">
+          <div class="toolbar">
+            <label class="search-box">
+              <span>⌕</span>
+              <input id="searchInput" type="search" placeholder="Dosya ara" />
+            </label>
+            <div class="view-toggle" aria-label="Görünüm">
+              <button class="active" data-view="grid" type="button" title="Kart görünümü">▦</button>
+              <button data-view="list" type="button" title="Liste görünümü">☰</button>
+            </div>
+            <button class="secondary-button" id="newFolderButton" type="button">Yeni klasör</button>
+            <label class="primary-button upload-button">
+              Yükle
+              <input id="fileInput" type="file" multiple />
+            </label>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat">
+              <span>Dosyalar</span>
+              <strong id="fileCount">0</strong>
+            </div>
+            <div class="stat">
+              <span>Klasörler</span>
+              <strong id="folderCount">0</strong>
+            </div>
+            <div class="stat">
+              <span>Paylaşımlar</span>
+              <strong id="shareCount">0</strong>
+            </div>
+          </div>
+
+          <section class="content-band">
+            <div class="section-title">
+              <h2 id="currentFolderTitle">Tüm dosyalar</h2>
+              <span id="resultCount">0 öğe</span>
+            </div>
+            <div class="file-grid" id="fileGrid"></div>
+            <div class="empty-state" id="emptyState" hidden>
+              <strong>Henüz burada dosya yok</strong>
+              <span>Yükle düğmesiyle birkaç dosya ekleyebilirsin.</span>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="folderDialog">
+      <form method="dialog" class="dialog-body" id="folderForm">
+        <h2>Yeni klasör</h2>
+        <label>
+          Klasör adı
+          <input id="folderNameInput" type="text" maxlength="32" required />
+        </label>
+        <div class="dialog-actions">
+          <button class="secondary-button" value="cancel" type="submit">Vazgeç</button>
+          <button class="primary-button" value="create" type="submit">Oluştur</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
