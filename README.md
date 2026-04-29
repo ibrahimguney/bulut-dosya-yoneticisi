@@ -24,7 +24,7 @@ index.html
 Ya da yerel sunucu ile calistir:
 
 ```bash
-npm.cmd start
+start-server.cmd
 ```
 
 Sunucu varsayilan olarak `http://localhost:4173` adresinde acilir.
@@ -35,7 +35,7 @@ Bu proje statik dosyalarla calisir. Vercel'de yeni proje olustururken:
 
 - Framework Preset: `Other`
 - Build Command: bos birak
-- Output Directory: bos birak
+- Output Directory: `public`
 - Install Command: bos birakilabilir
 - Vercel'de Node sunucusu calistirilmaz; `index.html`, `styles.css` ve `app.js` statik olarak yayinlanir.
 

@@ -2,8 +2,5 @@
   "name": "bulut-dosya-yoneticisi",
   "version": "0.1.0",
   "private": true,
-  "description": "Yerelde calisan bulut dosya yoneticisi prototipi.",
-  "scripts": {
-    "start": "node local-server.js"
-  }
+  "description": "Yerelde calisan bulut dosya yoneticisi prototipi."
 }
