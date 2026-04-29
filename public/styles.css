@@ -133,7 +133,8 @@ button {
 .topbar,
 .toolbar,
 .account,
-.dialog-actions {
+.dialog-actions,
+.auth-actions {
   display: flex;
   align-items: center;
 }
@@ -480,6 +481,15 @@ dialog::backdrop {
 .dialog-actions {
   justify-content: flex-end;
   gap: 10px;
+}
+
+.auth-actions {
+  gap: 10px;
+}
+
+.auth-actions .primary-button,
+.auth-actions .secondary-button {
+  flex: 1;
 }
 
 .toast {

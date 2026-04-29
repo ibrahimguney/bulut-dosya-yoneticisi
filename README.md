@@ -41,8 +41,8 @@ Bu proje statik dosyalarla calisir. Vercel'de yeni proje olustururken:
 
 ## Sonraki Adimlar
 
-- Supabase Auth ile gercek kullanici girisi
-- Supabase Storage, AWS S3 veya Cloudflare R2 ile gercek dosya depolama
+- Supabase SQL Editor icinde `supabase-setup.sql` dosyasindaki komutlari calistir
+- Authentication ayarlarinda Email provider'in acik oldugunu kontrol et
 - Dosya paylasim izinleri
 - Klasor ici gezinme
 - Backend API ve veritabani modeli
