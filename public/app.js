@@ -27,6 +27,7 @@ const state = {
 const els = {
   authView: document.querySelector("#authView"),
   authForm: document.querySelector("#authForm"),
+  authMessage: document.querySelector("#authMessage"),
   emailInput: document.querySelector("#emailInput"),
   passwordInput: document.querySelector("#passwordInput"),
   dashboard: document.querySelector("#dashboard"),
@@ -86,6 +87,7 @@ async function handleAuthSubmit(event) {
   const email = els.emailInput.value.trim();
   const password = els.passwordInput.value;
 
+  setAuthMessage("İşlem yapılıyor...", "info");
   submitter.disabled = true;
   try {
     const result =
@@ -95,11 +97,20 @@ async function handleAuthSubmit(event) {
 
     if (result.error) throw result.error;
 
-    showToast(mode === "signup" ? "Kayıt oluşturuldu. E-postanı doğrulaman gerekebilir." : "Oturum açıldı.");
-    await loadFiles();
+    if (mode === "signup" && !result.data.session) {
+      setAuthMessage("Kayıt oluşturuldu. Supabase e-posta doğrulaması istiyorsa gelen kutunu kontrol et.", "success");
+      showToast("Kayıt oluşturuldu.");
+      return;
+    }
+
+    state.user = result.data.user || result.data.session?.user || state.user;
+    setAuthMessage("Oturum açıldı.", "success");
+    if (state.user) await loadFiles();
     render();
   } catch (error) {
-    showToast(error.message || "Giriş işlemi tamamlanamadı.");
+    const message = translateAuthError(error.message || "Giriş işlemi tamamlanamadı.");
+    setAuthMessage(message, "error");
+    showToast(message);
   } finally {
     submitter.disabled = false;
   }
@@ -395,6 +406,20 @@ function escapeHtml(value) {
     const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
     return entities[char];
   });
+}
+
+function translateAuthError(message) {
+  const lower = message.toLocaleLowerCase("tr-TR");
+  if (lower.includes("invalid login credentials")) return "E-posta veya şifre hatalı. Önce Kayıt ol düğmesiyle hesap oluştur.";
+  if (lower.includes("email not confirmed")) return "E-posta doğrulanmamış. Gelen kutundaki Supabase doğrulama linkine tıkla.";
+  if (lower.includes("user already registered")) return "Bu e-posta zaten kayıtlı. Giriş yap düğmesini kullan.";
+  if (lower.includes("password should be at least")) return "Şifre en az 6 karakter olmalı.";
+  return message;
+}
+
+function setAuthMessage(message, type = "info") {
+  els.authMessage.textContent = message;
+  els.authMessage.className = `auth-message ${type === "info" ? "" : type}`;
 }
 
 function showToast(message) {

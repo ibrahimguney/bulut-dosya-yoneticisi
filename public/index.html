@@ -71,12 +71,13 @@
             <h2>Bulut alanına giriş</h2>
             <label>
               E-posta
-              <input id="emailInput" type="email" value="ibrahim@example.com" required />
+              <input id="emailInput" type="email" autocomplete="email" placeholder="ornek@email.com" required />
             </label>
             <label>
               Şifre
-              <input id="passwordInput" type="password" value="123456" minlength="6" required />
+              <input id="passwordInput" type="password" autocomplete="current-password" minlength="6" placeholder="En az 6 karakter" required />
             </label>
+            <p class="auth-message" id="authMessage" role="status" aria-live="polite"></p>
             <div class="auth-actions">
               <button class="primary-button" type="submit" data-auth-mode="signin">Giriş yap</button>
               <button class="secondary-button" type="submit" data-auth-mode="signup">Kayıt ol</button>
