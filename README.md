@@ -37,6 +37,7 @@ Bu proje statik dosyalarla calisir. Vercel'de yeni proje olustururken:
 - Build Command: bos birak
 - Output Directory: bos birak
 - Install Command: bos birakilabilir
+- Vercel'de Node sunucusu calistirilmaz; `index.html`, `styles.css` ve `app.js` statik olarak yayinlanir.
 
 ## Sonraki Adimlar
 

@@ -4,6 +4,6 @@
   "private": true,
   "description": "Yerelde calisan bulut dosya yoneticisi prototipi.",
   "scripts": {
-    "start": "node server.js"
+    "start": "node local-server.js"
   }
 }
