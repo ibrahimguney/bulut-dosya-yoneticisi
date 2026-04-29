@@ -1,3 +1,3 @@
 @echo off
 cd /d "%~dp0"
-"C:\Program Files\nodejs\node.exe" local-server.js
+"C:\Program Files\nodejs\node.exe" tools\local-server.cjs
