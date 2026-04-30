@@ -50,8 +50,10 @@ const els = {
   storageText: document.querySelector("#storageText"),
   newFolderButton: document.querySelector("#newFolderButton"),
   folderDialog: document.querySelector("#folderDialog"),
+  folderDialogTitle: document.querySelector("#folderDialogTitle"),
   folderForm: document.querySelector("#folderForm"),
   folderNameInput: document.querySelector("#folderNameInput"),
+  folderSubmitButton: document.querySelector("#folderSubmitButton"),
   toast: document.querySelector("#toast"),
 };
 
@@ -61,11 +63,9 @@ els.signOutButton.addEventListener("click", signOut);
 els.searchInput.addEventListener("input", renderFiles);
 els.fileInput.addEventListener("change", handleFiles);
 els.newFolderButton.addEventListener("click", () => {
-  els.folderNameInput.value = "";
-  els.folderDialog.showModal();
-  els.folderNameInput.focus();
+  openFolderDialog();
 });
-els.folderForm.addEventListener("submit", handleFolderCreate);
+els.folderForm.addEventListener("submit", handleFolderSave);
 
 init();
 
@@ -129,6 +129,16 @@ async function signOut() {
 }
 
 function handleDocumentClick(event) {
+  const folderActionButton = event.target.closest("[data-folder-action]");
+  if (folderActionButton) {
+    const folder = state.folders.find((item) => item.id === folderActionButton.dataset.folderId);
+    if (!folder) return;
+
+    if (folderActionButton.dataset.folderAction === "rename") openFolderDialog(folder);
+    if (folderActionButton.dataset.folderAction === "delete") deleteFolder(folder);
+    return;
+  }
+
   const navButton = event.target.closest("[data-folder]");
   if (navButton) {
     state.activeFolder = navButton.dataset.folder;
@@ -186,19 +196,29 @@ async function handleFiles(event) {
   showToast(`${files.length} dosya yüklendi.`);
 }
 
-async function handleFolderCreate(event) {
-  if (event.submitter?.value !== "create") return;
+async function handleFolderSave(event) {
+  if (event.submitter?.value !== "save") return;
 
   const name = els.folderNameInput.value.trim();
   if (!name) return;
 
+  const editingId = els.folderForm.dataset.editingFolder || "";
   const id = slugify(name);
-  if (state.folders.some((folder) => folder.id === id)) {
+  if (state.folders.some((folder) => folder.id === id && folder.id !== editingId)) {
     showToast("Bu klasör zaten var.");
     event.preventDefault();
     return;
   }
 
+  if (editingId) {
+    await renameFolder(editingId, id, name, event);
+    return;
+  }
+
+  await createFolder(id, name, event);
+}
+
+async function createFolder(id, name, event) {
   const { data, error } = await supabase
     .from("folders")
     .insert({ slug: id, name })
@@ -217,6 +237,59 @@ async function handleFolderCreate(event) {
   syncFolderNav();
   render();
   showToast("Klasör oluşturuldu.");
+}
+
+async function renameFolder(oldId, newId, name, event) {
+  const folder = state.folders.find((item) => item.id === oldId);
+  if (!folder || folder.system) return;
+
+  const folderFiles = state.files.filter((file) => file.folder === oldId);
+  const nextSlug = folderFiles.length ? oldId : newId;
+
+  const { data, error } = await supabase
+    .from("folders")
+    .update({ slug: nextSlug, name })
+    .eq("slug", oldId)
+    .select("slug, name")
+    .single();
+
+  if (error) {
+    showToast(error.message || "Klasör güncellenemedi.");
+    event.preventDefault();
+    return;
+  }
+
+  folder.id = data.slug;
+  folder.name = data.name;
+  if (state.activeFolder === oldId) state.activeFolder = data.slug;
+  await loadWorkspace();
+  if (state.folders.some((item) => item.id === data.slug)) state.activeFolder = data.slug;
+  render();
+  showToast(folderFiles.length && oldId !== newId ? "Klasör adı güncellendi; içindeki dosyalar korundu." : "Klasör güncellendi.");
+}
+
+async function deleteFolder(folder) {
+  if (folder.system) return;
+
+  const folderFiles = state.files.filter((file) => file.folder === folder.id);
+  if (folderFiles.length) {
+    showToast("Bu klasör boş değil. Önce içindeki dosyaları sil.");
+    return;
+  }
+
+  const confirmed = window.confirm(`"${folder.name}" klasörü silinsin mi?`);
+  if (!confirmed) return;
+
+  const { error } = await supabase.from("folders").delete().eq("slug", folder.id);
+  if (error) {
+    showToast(error.message || "Klasör silinemedi.");
+    return;
+  }
+
+  state.folders = state.folders.filter((item) => item.id !== folder.id);
+  if (state.activeFolder === folder.id) state.activeFolder = "all";
+  render();
+  showToast("Klasör silindi.");
 }
 
 async function loadWorkspace() {
@@ -412,8 +485,25 @@ function addFolderNavItem(folder) {
   button.dataset.folder = folder.id;
   button.dataset.dynamicFolder = "true";
   button.type = "button";
-  button.innerHTML = `<span class="nav-icon">▤</span>${escapeHtml(folder.name)}`;
+  button.innerHTML = `
+    <span class="nav-icon">▤</span>
+    <span>${escapeHtml(folder.name)}</span>
+    <span class="nav-folder-actions">
+      <button type="button" data-folder-action="rename" data-folder-id="${escapeHtml(folder.id)}" title="Yeniden adlandır" aria-label="Yeniden adlandır">✎</button>
+      <button type="button" data-folder-action="delete" data-folder-id="${escapeHtml(folder.id)}" title="Sil" aria-label="Sil">×</button>
+    </span>
+  `;
   document.querySelector(".nav-list").append(button);
+}
+
+function openFolderDialog(folder = null) {
+  els.folderForm.dataset.editingFolder = folder?.id || "";
+  els.folderDialogTitle.textContent = folder ? "Klasörü düzenle" : "Yeni klasör";
+  els.folderSubmitButton.textContent = folder ? "Kaydet" : "Oluştur";
+  els.folderNameInput.value = folder?.name || "";
+  els.folderDialog.showModal();
+  els.folderNameInput.focus();
+  els.folderNameInput.select();
 }
 
 function inferFolder(file) {

@@ -107,6 +107,35 @@ button {
   text-align: left;
 }
 
+.nav-item span:nth-child(2) {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-folder-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.nav-folder-actions button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+}
+
+.nav-folder-actions button:hover {
+  border-color: #b5d4ff;
+  background: #fff;
+}
+
 .nav-item.active,
 .nav-item:hover {
   border-color: #cfe2ff;

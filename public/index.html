@@ -134,14 +134,14 @@
 
     <dialog id="folderDialog">
       <form method="dialog" class="dialog-body" id="folderForm">
-        <h2>Yeni klasör</h2>
+        <h2 id="folderDialogTitle">Yeni klasör</h2>
         <label>
           Klasör adı
           <input id="folderNameInput" type="text" maxlength="32" required />
         </label>
         <div class="dialog-actions">
           <button class="secondary-button" value="cancel" type="submit">Vazgeç</button>
-          <button class="primary-button" value="create" type="submit">Oluştur</button>
+          <button class="primary-button" id="folderSubmitButton" value="save" type="submit">Oluştur</button>
         </div>
       </form>
     </dialog>
