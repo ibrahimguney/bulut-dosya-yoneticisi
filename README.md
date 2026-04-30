@@ -42,6 +42,7 @@ Bu proje statik dosyalarla calisir. Vercel'de yeni proje olustururken:
 ## Sonraki Adimlar
 
 - Supabase SQL Editor icinde `supabase-setup.sql` dosyasindaki komutlari calistir
+- Daha once kurulum yapildiysa kalici klasorler icin `supabase-folders.sql` dosyasindaki komutlari calistir
 - Authentication ayarlarinda Email provider'in acik oldugunu kontrol et
 - Dosya paylasim izinleri
 - Klasor ici gezinme

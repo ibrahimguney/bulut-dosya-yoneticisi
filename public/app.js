@@ -5,6 +5,11 @@ const SUPABASE_KEY = "sb_publishable_7jm5f6_T8QaqwO4fAkhKnQ_7-woQ-fl";
 const BUCKET = "files";
 const QUOTA_BYTES = 100 * 1024 * 1024;
 const SHARED_FILES_KEY = "bulut-shared-files";
+const DEFAULT_FOLDERS = [
+  { id: "documents", name: "Belgeler", system: true },
+  { id: "images", name: "Görseller", system: true },
+  { id: "shared", name: "Paylaşılanlar", system: true },
+];
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
@@ -19,11 +24,7 @@ const state = {
   view: "grid",
   files: [],
   sharedFiles: loadSharedFiles(),
-  folders: [
-    { id: "documents", name: "Belgeler" },
-    { id: "images", name: "Görseller" },
-    { id: "shared", name: "Paylaşılanlar" },
-  ],
+  folders: [...DEFAULT_FOLDERS],
 };
 
 const els = {
@@ -74,11 +75,11 @@ async function init() {
 
   supabase.auth.onAuthStateChange(async (_event, session) => {
     state.user = session?.user || null;
-    if (state.user) await loadFiles();
+    if (state.user) await loadWorkspace();
     render();
   });
 
-  if (state.user) await loadFiles();
+  if (state.user) await loadWorkspace();
   render();
 }
 
@@ -107,7 +108,7 @@ async function handleAuthSubmit(event) {
 
     state.user = result.data.user || result.data.session?.user || state.user;
     setAuthMessage("Oturum açıldı.", "success");
-    if (state.user) await loadFiles();
+    if (state.user) await loadWorkspace();
     render();
   } catch (error) {
     const message = translateAuthError(error.message || "Giriş işlemi tamamlanamadı.");
@@ -122,6 +123,8 @@ async function signOut() {
   await supabase.auth.signOut();
   state.user = null;
   state.files = [];
+  state.folders = [...DEFAULT_FOLDERS];
+  state.activeFolder = "all";
   render();
 }
 
@@ -196,11 +199,48 @@ async function handleFolderCreate(event) {
     return;
   }
 
-  state.folders.push({ id, name });
+  const { data, error } = await supabase
+    .from("folders")
+    .insert({ slug: id, name })
+    .select("slug, name")
+    .single();
+
+  if (error) {
+    showToast(error.message || "Klasör oluşturulamadı.");
+    event.preventDefault();
+    return;
+  }
+
+  const folder = { id: data.slug, name: data.name, system: false };
+  state.folders.push(folder);
   state.activeFolder = id;
-  addFolderNavItem({ id, name });
+  syncFolderNav();
   render();
   showToast("Klasör oluşturuldu.");
+}
+
+async function loadWorkspace() {
+  await loadFolders();
+  await loadFiles();
+}
+
+async function loadFolders() {
+  if (!state.user) return;
+
+  const { data, error } = await supabase.from("folders").select("slug, name").order("created_at");
+
+  if (error) {
+    state.folders = [...DEFAULT_FOLDERS];
+    showToast(error.message || "Klasörler okunamadı.");
+    return;
+  }
+
+  const customFolders = (data || []).map((folder) => ({
+    id: folder.slug,
+    name: folder.name,
+    system: false,
+  }));
+  state.folders = [...DEFAULT_FOLDERS, ...customFolders];
 }
 
 async function loadFiles() {
@@ -243,7 +283,7 @@ function render() {
   els.dashboard.hidden = !signedIn;
   els.accountName.textContent = state.user?.email || "Oturum kapalı";
 
-  ensureCustomFolders();
+  syncFolderNav();
 
   document.querySelectorAll("[data-folder]").forEach((button) => {
     button.classList.toggle("active", button.dataset.folder === state.activeFolder);
@@ -261,7 +301,7 @@ function renderStats() {
   const usage = getUsage();
   const percent = getUsagePercent(usage);
   els.fileCount.textContent = state.files.length;
-  els.folderCount.textContent = state.folders.length;
+  els.folderCount.textContent = state.folders.filter((folder) => folder.id !== "shared").length;
   els.shareCount.textContent = state.files.filter((file) => file.shared).length;
   els.storagePercent.textContent = percent.label;
   els.storageMeter.style.width = percent.meterWidth;
@@ -359,8 +399,9 @@ function getFolderTitle() {
   return state.folders.find((folder) => folder.id === state.activeFolder)?.name || "Klasör";
 }
 
-function ensureCustomFolders() {
-  state.folders.forEach(addFolderNavItem);
+function syncFolderNav() {
+  document.querySelectorAll("[data-dynamic-folder='true']").forEach((button) => button.remove());
+  state.folders.filter((folder) => !folder.system).forEach(addFolderNavItem);
 }
 
 function addFolderNavItem(folder) {
@@ -369,6 +410,7 @@ function addFolderNavItem(folder) {
   const button = document.createElement("button");
   button.className = "nav-item";
   button.dataset.folder = folder.id;
+  button.dataset.dynamicFolder = "true";
   button.type = "button";
   button.innerHTML = `<span class="nav-icon">▤</span>${escapeHtml(folder.name)}`;
   document.querySelector(".nav-list").append(button);
