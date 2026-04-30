@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL = "https://yqleugywrmevmsjzekdw.supabase.co";
+const SUPABASE_URL = "https://gblyelnbskjsumxxdyct.supabase.co";
 const SUPABASE_KEY = "sb_publishable_7jm5f6_T8QaqwO4fAkhKnQ_7-woQ-fl";
 const BUCKET = "files";
 const QUOTA_BYTES = 100 * 1024 * 1024;
