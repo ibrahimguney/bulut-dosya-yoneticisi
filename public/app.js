@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL = "https://cxaprslawjskhoacfgjr.supabase.co";
+const SUPABASE_URL = "https://yqleugywrmevmsjzekdw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_7jm5f6_T8QaqwO4fAkhKnQ_7-woQ-fl";
 const BUCKET = "files";
 const QUOTA_BYTES = 100 * 1024 * 1024;
@@ -410,6 +410,7 @@ function escapeHtml(value) {
 
 function translateAuthError(message) {
   const lower = message.toLocaleLowerCase("tr-TR");
+  if (lower.includes("failed to fetch")) return "Supabase bağlantısı kurulamadı. Project URL veya publishable key yanlış olabilir.";
   if (lower.includes("invalid login credentials")) return "E-posta veya şifre hatalı. Önce Kayıt ol düğmesiyle hesap oluştur.";
   if (lower.includes("email not confirmed")) return "E-posta doğrulanmamış. Gelen kutundaki Supabase doğrulama linkine tıkla.";
   if (lower.includes("user already registered")) return "Bu e-posta zaten kayıtlı. Giriş yap düğmesini kullan.";
