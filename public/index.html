@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bulut Dosya Yöneticisi</title>
+    <title>Bulut Alanı | Dosya Yönetimi</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -18,26 +18,26 @@
           </div>
           <div>
             <strong>Bulut Alanı</strong>
-            <span>Dosya yönetimi</span>
+            <span>Dosya operasyonları</span>
           </div>
         </div>
 
         <nav class="nav-list" aria-label="Klasörler">
           <button class="nav-item active" data-folder="all" type="button">
             <span class="nav-icon">⌂</span>
-            Tüm dosyalar
+            <span>Tüm dosyalar</span>
           </button>
           <button class="nav-item" data-folder="documents" type="button">
-            <span class="nav-icon">▤</span>
-            Belgeler
+            <span class="nav-icon">□</span>
+            <span>Belgeler</span>
           </button>
           <button class="nav-item" data-folder="images" type="button">
-            <span class="nav-icon">◩</span>
-            Görseller
+            <span class="nav-icon">◧</span>
+            <span>Görseller</span>
           </button>
           <button class="nav-item" data-folder="shared" type="button">
             <span class="nav-icon">↗</span>
-            Paylaşılanlar
+            <span>Paylaşılanlar</span>
           </button>
         </nav>
 
@@ -56,45 +56,77 @@
       <main class="workspace">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Yerel prototip</p>
+            <p class="eyebrow">Çalışma alanı</p>
             <h1>Bulut Dosya Yöneticisi</h1>
           </div>
           <div class="account">
-            <span id="accountName">ibrahim@example.com</span>
+            <span id="accountName">Oturum kapalı</span>
             <button class="icon-button" id="signOutButton" type="button" title="Oturumu kapat" aria-label="Oturumu kapat">⏻</button>
           </div>
         </header>
 
         <section class="auth-view" id="authView" hidden>
-          <form class="auth-panel" id="authForm">
-            <p class="eyebrow">Hesap</p>
-            <h2>Bulut alanına giriş</h2>
-            <label>
-              E-posta
-              <input id="emailInput" type="email" autocomplete="email" placeholder="ornek@email.com" required />
-            </label>
-            <label>
-              Şifre
-              <input id="passwordInput" type="password" autocomplete="current-password" minlength="6" placeholder="En az 6 karakter" required />
-            </label>
-            <p class="auth-message" id="authMessage" role="status" aria-live="polite"></p>
-            <div class="auth-actions">
-              <button class="primary-button" type="submit" data-auth-mode="signin">Giriş yap</button>
-              <button class="secondary-button" type="submit" data-auth-mode="signup">Kayıt ol</button>
+          <div class="auth-layout">
+            <div class="auth-hero">
+              <p class="eyebrow">Bulut Alanı</p>
+              <h2>Dosyalar için sade ve güvenli çalışma alanı</h2>
+              <div class="auth-preview" aria-hidden="true">
+                <div class="preview-row">
+                  <span>PDF</span>
+                  <strong>Teklif-dosyasi.pdf</strong>
+                </div>
+                <div class="preview-row">
+                  <span>IMG</span>
+                  <strong>Urun-gorseli.png</strong>
+                </div>
+                <div class="preview-row muted">
+                  <span>↗</span>
+                  <strong>Paylaşım linki hazır</strong>
+                </div>
+              </div>
             </div>
-          </form>
+
+            <form class="auth-panel" id="authForm">
+              <div>
+                <p class="eyebrow">Güvenli erişim</p>
+                <h2>Hesabına giriş yap</h2>
+              </div>
+              <label>
+                E-posta
+                <input id="emailInput" type="email" autocomplete="email" placeholder="ornek@email.com" required />
+              </label>
+              <label>
+                Şifre
+                <input id="passwordInput" type="password" autocomplete="current-password" minlength="6" placeholder="En az 6 karakter" required />
+              </label>
+              <p class="auth-message" id="authMessage" role="status" aria-live="polite"></p>
+              <div class="auth-actions">
+                <button class="primary-button" type="submit" data-auth-mode="signin">Giriş yap</button>
+                <button class="secondary-button" type="submit" data-auth-mode="signup">Kayıt ol</button>
+              </div>
+            </form>
+          </div>
         </section>
 
         <section class="dashboard" id="dashboard">
-          <div class="toolbar">
+          <div class="command-bar">
             <label class="search-box">
               <span>⌕</span>
-              <input id="searchInput" type="search" placeholder="Dosya ara" />
+              <input id="searchInput" type="search" placeholder="Dosya adıyla ara" />
             </label>
             <div class="view-toggle" aria-label="Görünüm">
-              <button class="active" data-view="grid" type="button" title="Kart görünümü">▦</button>
-              <button data-view="list" type="button" title="Liste görünümü">☰</button>
+              <button class="active" data-view="grid" type="button" title="Kart görünümü" aria-label="Kart görünümü">▦</button>
+              <button data-view="list" type="button" title="Liste görünümü" aria-label="Liste görünümü">☰</button>
             </div>
+            <label class="select-control">
+              <span>Sırala</span>
+              <select id="sortSelect">
+                <option value="newest">En yeni</option>
+                <option value="name">Ada göre</option>
+                <option value="size">Boyuta göre</option>
+              </select>
+            </label>
+            <button class="icon-button" id="refreshButton" type="button" title="Yenile" aria-label="Yenile">↻</button>
             <button class="secondary-button" id="newFolderButton" type="button">Yeni klasör</button>
             <label class="primary-button upload-button">
               Yükle
@@ -117,17 +149,42 @@
             </div>
           </div>
 
-          <section class="content-band">
-            <div class="section-title">
-              <h2 id="currentFolderTitle">Tüm dosyalar</h2>
-              <span id="resultCount">0 öğe</span>
-            </div>
-            <div class="file-grid" id="fileGrid"></div>
-            <div class="empty-state" id="emptyState" hidden>
-              <strong>Henüz burada dosya yok</strong>
-              <span>Yükle düğmesiyle birkaç dosya ekleyebilirsin.</span>
-            </div>
-          </section>
+          <div class="work-grid">
+            <section class="content-band">
+              <div class="section-title">
+                <div>
+                  <p class="eyebrow">Dosya listesi</p>
+                  <h2 id="currentFolderTitle">Tüm dosyalar</h2>
+                </div>
+                <div class="section-meta">
+                  <span id="resultCount">0 öğe</span>
+                  <span id="lastSyncText">Henüz güncellenmedi</span>
+                </div>
+              </div>
+              <div class="file-grid" id="fileGrid"></div>
+              <div class="empty-state" id="emptyState" hidden>
+                <strong>Bu alanda dosya yok</strong>
+                <span>Yükle düğmesiyle dosya ekleyebilir veya yeni klasör oluşturabilirsin.</span>
+              </div>
+            </section>
+
+            <aside class="insights-panel" aria-label="Çalışma alanı özeti">
+              <div class="insight-card">
+                <span>Depolama durumu</span>
+                <strong id="storageHealthText">Boş alan hazır</strong>
+              </div>
+              <div class="insight-card">
+                <span>En büyük dosya</span>
+                <strong id="largestFileText">Henüz dosya yok</strong>
+              </div>
+              <div class="activity-card">
+                <div class="section-title compact">
+                  <h2>Son hareketler</h2>
+                </div>
+                <div class="activity-list" id="activityList"></div>
+              </div>
+            </aside>
+          </div>
         </section>
       </main>
     </div>

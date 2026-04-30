@@ -22,6 +22,9 @@ const state = {
   user: null,
   activeFolder: "all",
   view: "grid",
+  sortBy: "newest",
+  isLoading: false,
+  lastSyncedAt: null,
   files: [],
   sharedFiles: loadSharedFiles(),
   folders: [...DEFAULT_FOLDERS],
@@ -37,10 +40,13 @@ const els = {
   accountName: document.querySelector("#accountName"),
   signOutButton: document.querySelector("#signOutButton"),
   searchInput: document.querySelector("#searchInput"),
+  sortSelect: document.querySelector("#sortSelect"),
+  refreshButton: document.querySelector("#refreshButton"),
   fileInput: document.querySelector("#fileInput"),
   fileGrid: document.querySelector("#fileGrid"),
   emptyState: document.querySelector("#emptyState"),
   resultCount: document.querySelector("#resultCount"),
+  lastSyncText: document.querySelector("#lastSyncText"),
   currentFolderTitle: document.querySelector("#currentFolderTitle"),
   fileCount: document.querySelector("#fileCount"),
   folderCount: document.querySelector("#folderCount"),
@@ -48,6 +54,9 @@ const els = {
   storagePercent: document.querySelector("#storagePercent"),
   storageMeter: document.querySelector("#storageMeter"),
   storageText: document.querySelector("#storageText"),
+  storageHealthText: document.querySelector("#storageHealthText"),
+  largestFileText: document.querySelector("#largestFileText"),
+  activityList: document.querySelector("#activityList"),
   newFolderButton: document.querySelector("#newFolderButton"),
   folderDialog: document.querySelector("#folderDialog"),
   folderDialogTitle: document.querySelector("#folderDialogTitle"),
@@ -61,6 +70,11 @@ document.addEventListener("click", handleDocumentClick);
 els.authForm.addEventListener("submit", handleAuthSubmit);
 els.signOutButton.addEventListener("click", signOut);
 els.searchInput.addEventListener("input", renderFiles);
+els.sortSelect.addEventListener("change", () => {
+  state.sortBy = els.sortSelect.value;
+  renderFiles();
+});
+els.refreshButton.addEventListener("click", refreshWorkspace);
 els.fileInput.addEventListener("change", handleFiles);
 els.newFolderButton.addEventListener("click", () => {
   openFolderDialog();
@@ -125,6 +139,7 @@ async function signOut() {
   state.files = [];
   state.folders = [...DEFAULT_FOLDERS];
   state.activeFolder = "all";
+  state.lastSyncedAt = null;
   render();
 }
 
@@ -293,8 +308,21 @@ async function deleteFolder(folder) {
 }
 
 async function loadWorkspace() {
-  await loadFolders();
-  await loadFiles();
+  setLoading(true);
+  try {
+    await loadFolders();
+    await loadFiles();
+    state.lastSyncedAt = new Date();
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function refreshWorkspace() {
+  if (!state.user || state.isLoading) return;
+  await loadWorkspace();
+  render();
+  showToast("Çalışma alanı güncellendi.");
 }
 
 async function loadFolders() {
@@ -354,7 +382,11 @@ function render() {
   const signedIn = Boolean(state.user);
   els.authView.hidden = signedIn;
   els.dashboard.hidden = !signedIn;
+  els.dashboard.classList.toggle("is-loading", state.isLoading);
+  els.signOutButton.hidden = !signedIn;
   els.accountName.textContent = state.user?.email || "Oturum kapalı";
+  els.sortSelect.value = state.sortBy;
+  els.refreshButton.disabled = state.isLoading;
 
   syncFolderNav();
 
@@ -367,6 +399,7 @@ function render() {
   });
 
   renderStats();
+  renderInsights();
   renderFiles();
 }
 
@@ -379,6 +412,17 @@ function renderStats() {
   els.storagePercent.textContent = percent.label;
   els.storageMeter.style.width = percent.meterWidth;
   els.storageText.textContent = `${formatSize(usage)} / ${formatSize(QUOTA_BYTES)}`;
+  els.lastSyncText.textContent = state.lastSyncedAt ? `Son güncelleme ${formatTime(state.lastSyncedAt)}` : "Henüz güncellenmedi";
+}
+
+function renderInsights() {
+  const usage = getUsage();
+  const largestFile = [...state.files].sort((a, b) => b.size - a.size)[0];
+  const recentFiles = [...state.files].sort((a, b) => b.createdAt - a.createdAt).slice(0, 4);
+
+  els.storageHealthText.textContent = getStorageHealth(usage);
+  els.largestFileText.textContent = largestFile ? `${largestFile.name} · ${formatSize(largestFile.size)}` : "Henüz dosya yok";
+  els.activityList.innerHTML = recentFiles.length ? recentFiles.map(activityTemplate).join("") : emptyActivityTemplate();
 }
 
 function renderFiles() {
@@ -387,6 +431,7 @@ function renderFiles() {
   els.resultCount.textContent = `${files.length} öğe`;
   els.emptyState.hidden = files.length > 0;
   els.fileGrid.className = `file-grid ${state.view === "list" ? "list" : ""}`;
+  els.fileGrid.setAttribute("aria-busy", state.isLoading ? "true" : "false");
   els.fileGrid.innerHTML = files.map(fileCardTemplate).join("");
 }
 
@@ -398,7 +443,14 @@ function getVisibleFiles() {
       if (state.activeFolder === "shared") return file.shared;
       return file.folder === state.activeFolder;
     })
-    .filter((file) => file.name.toLocaleLowerCase("tr-TR").includes(query));
+    .filter((file) => file.name.toLocaleLowerCase("tr-TR").includes(query))
+    .sort(sortFiles);
+}
+
+function sortFiles(a, b) {
+  if (state.sortBy === "name") return a.name.localeCompare(b.name, "tr-TR", { sensitivity: "base" });
+  if (state.sortBy === "size") return b.size - a.size;
+  return b.createdAt - a.createdAt;
 }
 
 function fileCardTemplate(file) {
@@ -420,6 +472,32 @@ function fileCardTemplate(file) {
         <button type="button" data-action="delete" data-id="${escapeHtml(file.id)}" title="Sil" aria-label="Sil">×</button>
       </div>
     </article>
+  `;
+}
+
+function activityTemplate(file) {
+  const extension = file.name.includes(".") ? file.name.split(".").pop().slice(0, 3).toUpperCase() : "DOC";
+
+  return `
+    <div class="activity-item">
+      <span class="activity-dot" aria-hidden="true">${escapeHtml(extension)}</span>
+      <span class="activity-copy">
+        <strong title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</strong>
+        <span>${getFolderName(file.folder)} · ${formatDate(file.createdAt)}</span>
+      </span>
+    </div>
+  `;
+}
+
+function emptyActivityTemplate() {
+  return `
+    <div class="activity-item">
+      <span class="activity-dot" aria-hidden="true">+</span>
+      <span class="activity-copy">
+        <strong>Henüz hareket yok</strong>
+        <span>Dosya yüklediğinde burada görünür.</span>
+      </span>
+    </div>
   `;
 }
 
@@ -470,6 +548,10 @@ async function deleteFile(file) {
 function getFolderTitle() {
   if (state.activeFolder === "all") return "Tüm dosyalar";
   return state.folders.find((folder) => folder.id === state.activeFolder)?.name || "Klasör";
+}
+
+function getFolderName(folderId) {
+  return state.folders.find((folder) => folder.id === folderId)?.name || "Klasör";
 }
 
 function syncFolderNav() {
@@ -526,6 +608,14 @@ function getUsagePercent(bytes) {
   return { label: `${rounded}%`, meterWidth: `${rounded}%` };
 }
 
+function getStorageHealth(bytes) {
+  const ratio = bytes / QUOTA_BYTES;
+  if (ratio >= 0.9) return "Kota sınırına yaklaşıyor";
+  if (ratio >= 0.65) return "Alan düzenli takip edilmeli";
+  if (bytes > 0) return "Alan sağlıklı görünüyor";
+  return "Boş alan hazır";
+}
+
 function formatSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -534,6 +624,16 @@ function formatSize(bytes) {
 
 function formatDate(timestamp) {
   return new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "short" }).format(timestamp);
+}
+
+function formatTime(date) {
+  return new Intl.DateTimeFormat("tr-TR", { hour: "2-digit", minute: "2-digit" }).format(date);
+}
+
+function setLoading(isLoading) {
+  state.isLoading = isLoading;
+  els.dashboard?.classList.toggle("is-loading", isLoading);
+  if (els.refreshButton) els.refreshButton.disabled = isLoading;
 }
 
 function slugify(value) {

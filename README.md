@@ -1,27 +1,19 @@
 # Bulut Dosya Yoneticisi
 
-Yerelde calisan bir bulut dosya yoneticisi prototipi.
+Supabase destekli, statik olarak yayinlanabilen bulut dosya yonetimi arayuzu.
 
 ## Ozellikler
 
-- E-posta ile demo giris
-- Dosya yukleme ve indirme
-- Klasor filtreleri
-- Yeni klasor olusturma
-- Arama
-- Kart ve liste gorunumu
-- Paylasim linki olusturma
-- Depolama kotasi gostergesi
+- E-posta ile hesap girisi
+- Dosya yukleme, indirme ve silme
+- Klasor filtreleri ve ozel klasorler
+- Arama, siralama, kart ve liste gorunumu
+- Sureli paylasim linki olusturma
+- Depolama kotasi ve son guncelleme gostergesi
 
 ## Calistirma
 
-HTML dosyasini dogrudan acabilirsin:
-
-```text
-index.html
-```
-
-Ya da yerel sunucu ile calistir:
+Yerel sunucu ile calistir:
 
 ```bash
 start-server.cmd
@@ -29,21 +21,34 @@ start-server.cmd
 
 Sunucu varsayilan olarak `http://localhost:4173` adresinde acilir.
 
-## Vercel Deploy
+Statik dosyalar `public` klasorundedir.
 
-Bu proje statik dosyalarla calisir. Vercel'de yeni proje olustururken:
+## GitHub Pages
+
+Bu repo `public` klasorunu GitHub Pages'e yayinlamak icin hazir bir workflow icerir.
+
+1. Repository `Settings > Pages` sayfasina gir.
+2. `Build and deployment` altinda `Source` alanini `GitHub Actions` yap.
+3. `main` branch'e push yapildiginda site otomatik yayinlanir.
+
+Beklenen proje adresi:
+
+```text
+https://ibrahimguney.github.io/bulut-dosya-yoneticisi/
+```
+
+## Vercel
+
+Vercel'de yeni proje olustururken:
 
 - Framework Preset: `Other`
 - Build Command: bos birak
 - Output Directory: `public`
 - Install Command: bos birakilabilir
-- Vercel'de Node sunucusu calistirilmaz; `index.html`, `styles.css` ve `app.js` statik olarak yayinlanir.
 
-## Sonraki Adimlar
+## Supabase
 
-- Supabase SQL Editor icinde `supabase-setup.sql` dosyasindaki komutlari calistir
-- Daha once kurulum yapildiysa kalici klasorler icin `supabase-folders.sql` dosyasindaki komutlari calistir
-- Authentication ayarlarinda Email provider'in acik oldugunu kontrol et
-- Dosya paylasim izinleri
-- Klasor ici gezinme
-- Backend API ve veritabani modeli
+- SQL Editor icinde `supabase-setup.sql` dosyasindaki komutlari calistir.
+- Daha once kurulum yapildiysa kalici klasorler icin `supabase-folders.sql` dosyasindaki komutlari calistir.
+- Authentication ayarlarinda Email provider'in acik oldugunu kontrol et.
+- Storage bucket adinin `files` oldugunu dogrula.
