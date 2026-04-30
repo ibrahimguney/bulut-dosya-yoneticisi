@@ -10,6 +10,41 @@ const DEFAULT_FOLDERS = [
   { id: "images", name: "Görseller", system: true },
   { id: "shared", name: "Paylaşılanlar", system: true },
 ];
+const DEMO_FOLDERS = [{ id: "projects", name: "Projeler", system: false }];
+const DEMO_FILES = [
+  {
+    name: "Musteri-sunum-notlari.pdf",
+    type: "application/pdf",
+    size: 2.4 * 1024 * 1024,
+    folder: "documents",
+    shared: true,
+    ageHours: 2,
+  },
+  {
+    name: "Urun-gorseli.png",
+    type: "image/png",
+    size: 980 * 1024,
+    folder: "images",
+    shared: false,
+    ageHours: 7,
+  },
+  {
+    name: "Teklif-tablosu.xlsx",
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    size: 640 * 1024,
+    folder: "projects",
+    shared: false,
+    ageHours: 24,
+  },
+  {
+    name: "Kampanya-metni.docx",
+    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    size: 420 * 1024,
+    folder: "documents",
+    shared: true,
+    ageHours: 40,
+  },
+];
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
@@ -20,6 +55,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
 
 const state = {
   user: null,
+  demoMode: false,
   activeFolder: "all",
   view: "grid",
   sortBy: "newest",
@@ -36,6 +72,7 @@ const els = {
   authMessage: document.querySelector("#authMessage"),
   emailInput: document.querySelector("#emailInput"),
   passwordInput: document.querySelector("#passwordInput"),
+  demoButton: document.querySelector("#demoButton"),
   dashboard: document.querySelector("#dashboard"),
   accountName: document.querySelector("#accountName"),
   signOutButton: document.querySelector("#signOutButton"),
@@ -68,6 +105,7 @@ const els = {
 
 document.addEventListener("click", handleDocumentClick);
 els.authForm.addEventListener("submit", handleAuthSubmit);
+els.demoButton.addEventListener("click", startDemo);
 els.signOutButton.addEventListener("click", signOut);
 els.searchInput.addEventListener("input", renderFiles);
 els.sortSelect.addEventListener("change", () => {
@@ -89,7 +127,10 @@ async function init() {
 
   supabase.auth.onAuthStateChange(async (_event, session) => {
     state.user = session?.user || null;
-    if (state.user) await loadWorkspace();
+    if (state.user) {
+      state.demoMode = false;
+      await loadWorkspace();
+    }
     render();
   });
 
@@ -134,13 +175,43 @@ async function handleAuthSubmit(event) {
 }
 
 async function signOut() {
-  await supabase.auth.signOut();
+  if (state.user) await supabase.auth.signOut();
   state.user = null;
+  state.demoMode = false;
   state.files = [];
   state.folders = [...DEFAULT_FOLDERS];
   state.activeFolder = "all";
   state.lastSyncedAt = null;
   render();
+}
+
+function startDemo() {
+  const now = Date.now();
+  state.user = null;
+  state.demoMode = true;
+  state.activeFolder = "all";
+  state.view = "grid";
+  state.sortBy = "newest";
+  state.folders = [...DEFAULT_FOLDERS, ...DEMO_FOLDERS];
+  state.sharedFiles = [];
+  state.files = DEMO_FILES.map((file, index) => {
+    const path = `demo/${file.folder}/${index + 1}-${sanitizeFileName(file.name)}`;
+    if (file.shared) state.sharedFiles.push(path);
+    return {
+      id: path,
+      path,
+      name: file.name,
+      type: file.type,
+      size: Math.round(file.size),
+      folder: file.folder,
+      shared: file.shared,
+      createdAt: now - file.ageHours * 60 * 60 * 1000,
+    };
+  });
+  state.lastSyncedAt = new Date();
+  setAuthMessage("", "info");
+  render();
+  showToast("Demo çalışma alanı açıldı.");
 }
 
 function handleDocumentClick(event) {
@@ -181,12 +252,36 @@ function handleDocumentClick(event) {
 
 async function handleFiles(event) {
   const files = Array.from(event.target.files || []);
-  if (!files.length || !state.user) return;
+  if (!files.length || (!state.user && !state.demoMode)) return;
 
   const incomingUsage = files.reduce((sum, file) => sum + file.size, 0);
   if (getUsage() + incomingUsage > QUOTA_BYTES) {
     showToast("Depolama kotası aşılıyor.");
     event.target.value = "";
+    return;
+  }
+
+  if (state.demoMode) {
+    const now = Date.now();
+    const demoFiles = files.map((file, index) => {
+      const folder = inferFolder(file);
+      const path = `demo/${folder}/${now}-${index}-${sanitizeFileName(file.name)}`;
+      return {
+        id: path,
+        path,
+        name: file.name,
+        type: file.type || "application/octet-stream",
+        size: file.size,
+        folder,
+        shared: false,
+        createdAt: now - index,
+      };
+    });
+    state.files = [...demoFiles, ...state.files];
+    state.lastSyncedAt = new Date();
+    event.target.value = "";
+    render();
+    showToast(`${files.length} demo dosyası eklendi.`);
     return;
   }
 
@@ -234,6 +329,16 @@ async function handleFolderSave(event) {
 }
 
 async function createFolder(id, name, event) {
+  if (state.demoMode) {
+    state.folders.push({ id, name, system: false });
+    state.activeFolder = id;
+    state.lastSyncedAt = new Date();
+    syncFolderNav();
+    render();
+    showToast("Demo klasörü oluşturuldu.");
+    return;
+  }
+
   const { data, error } = await supabase
     .from("folders")
     .insert({ slug: id, name })
@@ -260,6 +365,21 @@ async function renameFolder(oldId, newId, name, event) {
 
   const folderFiles = state.files.filter((file) => file.folder === oldId);
   const nextSlug = folderFiles.length ? oldId : newId;
+
+  if (state.demoMode) {
+    folder.id = nextSlug;
+    folder.name = name;
+    if (!folderFiles.length) {
+      state.files.forEach((file) => {
+        if (file.folder === oldId) file.folder = nextSlug;
+      });
+    }
+    if (state.activeFolder === oldId) state.activeFolder = nextSlug;
+    state.lastSyncedAt = new Date();
+    render();
+    showToast("Demo klasörü güncellendi.");
+    return;
+  }
 
   const { data, error } = await supabase
     .from("folders")
@@ -295,6 +415,15 @@ async function deleteFolder(folder) {
   const confirmed = window.confirm(`"${folder.name}" klasörü silinsin mi?`);
   if (!confirmed) return;
 
+  if (state.demoMode) {
+    state.folders = state.folders.filter((item) => item.id !== folder.id);
+    if (state.activeFolder === folder.id) state.activeFolder = "all";
+    state.lastSyncedAt = new Date();
+    render();
+    showToast("Demo klasörü silindi.");
+    return;
+  }
+
   const { error } = await supabase.from("folders").delete().eq("slug", folder.id);
   if (error) {
     showToast(error.message || "Klasör silinemedi.");
@@ -319,7 +448,14 @@ async function loadWorkspace() {
 }
 
 async function refreshWorkspace() {
-  if (!state.user || state.isLoading) return;
+  if (state.isLoading) return;
+  if (state.demoMode) {
+    state.lastSyncedAt = new Date();
+    render();
+    showToast("Demo çalışma alanı güncellendi.");
+    return;
+  }
+  if (!state.user) return;
   await loadWorkspace();
   render();
   showToast("Çalışma alanı güncellendi.");
@@ -379,12 +515,12 @@ async function listFolder(folder) {
 }
 
 function render() {
-  const signedIn = Boolean(state.user);
+  const signedIn = Boolean(state.user || state.demoMode);
   els.authView.hidden = signedIn;
   els.dashboard.hidden = !signedIn;
   els.dashboard.classList.toggle("is-loading", state.isLoading);
   els.signOutButton.hidden = !signedIn;
-  els.accountName.textContent = state.user?.email || "Oturum kapalı";
+  els.accountName.textContent = state.demoMode ? "Demo çalışma alanı" : state.user?.email || "Oturum kapalı";
   els.sortSelect.value = state.sortBy;
   els.refreshButton.disabled = state.isLoading;
 
@@ -502,6 +638,15 @@ function emptyActivityTemplate() {
 }
 
 async function shareFile(file) {
+  if (state.demoMode) {
+    file.shared = true;
+    if (!state.sharedFiles.includes(file.path)) state.sharedFiles.push(file.path);
+    await navigator.clipboard?.writeText(`${location.origin}${location.pathname}#demo-share=${encodeURIComponent(file.name)}`);
+    render();
+    showToast("Demo paylaşım linki panoya kopyalandı.");
+    return;
+  }
+
   const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(file.path, 60 * 60);
   if (error) {
     showToast(error.message || "Paylaşım linki oluşturulamadı.");
@@ -519,6 +664,17 @@ async function shareFile(file) {
 }
 
 async function downloadFile(file) {
+  if (state.demoMode) {
+    const blob = new Blob([`Demo dosya: ${file.name}`], { type: "text/plain;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = file.name.replace(/\.[^.]+$/, ".txt");
+    link.click();
+    URL.revokeObjectURL(link.href);
+    showToast("Demo dosyası indirildi.");
+    return;
+  }
+
   const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(file.path, 60);
   if (error) {
     showToast(error.message || "İndirme linki oluşturulamadı.");
@@ -532,6 +688,15 @@ async function downloadFile(file) {
 }
 
 async function deleteFile(file) {
+  if (state.demoMode) {
+    state.files = state.files.filter((item) => item.id !== file.id);
+    state.sharedFiles = state.sharedFiles.filter((path) => path !== file.path);
+    state.lastSyncedAt = new Date();
+    render();
+    showToast("Demo dosyası silindi.");
+    return;
+  }
+
   const { error } = await supabase.storage.from(BUCKET).remove([file.path]);
   if (error) {
     showToast(error.message || "Dosya silinemedi.");

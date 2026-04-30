@@ -435,7 +435,8 @@ select:focus {
 }
 
 .primary-button,
-.secondary-button {
+.secondary-button,
+.ghost-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -466,6 +467,17 @@ select:focus {
 .secondary-button:hover {
   border-color: #bdd8f4;
   color: var(--brand-strong);
+}
+
+.ghost-button {
+  border: 1px dashed #b8c7d8;
+  background: #f8fbff;
+  color: var(--brand-strong);
+}
+
+.ghost-button:hover {
+  border-style: solid;
+  background: #eaf4ff;
 }
 
 .upload-button input {
@@ -761,6 +773,10 @@ dialog::backdrop {
   flex: 1;
 }
 
+.auth-panel .ghost-button {
+  width: 100%;
+}
+
 .toast {
   position: fixed;
   right: 22px;
@@ -866,7 +882,8 @@ dialog::backdrop {
   .view-toggle,
   .select-control,
   .primary-button,
-  .secondary-button {
+  .secondary-button,
+  .ghost-button {
     width: 100%;
   }
 
