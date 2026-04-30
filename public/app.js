@@ -4,6 +4,7 @@ const SUPABASE_URL = "https://gblyelnbskjsumxxdyct.supabase.co";
 const SUPABASE_KEY = "sb_publishable_7jm5f6_T8QaqwO4fAkhKnQ_7-woQ-fl";
 const BUCKET = "files";
 const QUOTA_BYTES = 100 * 1024 * 1024;
+const SHARED_FILES_KEY = "bulut-shared-files";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
@@ -17,6 +18,7 @@ const state = {
   activeFolder: "all",
   view: "grid",
   files: [],
+  sharedFiles: loadSharedFiles(),
   folders: [
     { id: "documents", name: "Belgeler" },
     { id: "images", name: "Görseller" },
@@ -230,7 +232,7 @@ async function listFolder(folder) {
       type: item.metadata?.mimetype || "application/octet-stream",
       size: item.metadata?.size || 0,
       folder,
-      shared: false,
+      shared: state.sharedFiles.includes(`${prefix}/${item.name}`),
       createdAt: new Date(item.created_at || item.updated_at || Date.now()).getTime(),
     }));
 }
@@ -257,12 +259,12 @@ function render() {
 
 function renderStats() {
   const usage = getUsage();
-  const percent = Math.min(100, Math.round((usage / QUOTA_BYTES) * 100));
+  const percent = getUsagePercent(usage);
   els.fileCount.textContent = state.files.length;
   els.folderCount.textContent = state.folders.length;
   els.shareCount.textContent = state.files.filter((file) => file.shared).length;
-  els.storagePercent.textContent = `${percent}%`;
-  els.storageMeter.style.width = `${percent}%`;
+  els.storagePercent.textContent = percent.label;
+  els.storageMeter.style.width = percent.meterWidth;
   els.storageText.textContent = `${formatSize(usage)} / ${formatSize(QUOTA_BYTES)}`;
 }
 
@@ -288,13 +290,16 @@ function getVisibleFiles() {
 
 function fileCardTemplate(file) {
   const extension = file.name.includes(".") ? file.name.split(".").pop().slice(0, 4).toUpperCase() : "FILE";
+  const sharedClass = file.shared ? "shared" : "";
+  const sharedBadge = file.shared ? '<span class="file-badge">Paylaşıldı</span>' : "";
 
   return `
     <article class="file-card">
-      <div class="file-symbol" aria-hidden="true">${extension}</div>
+      <div class="file-symbol ${sharedClass}" aria-hidden="true">${extension}</div>
       <div class="file-meta">
         <strong title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</strong>
         <span>${formatSize(file.size)} · ${formatDate(file.createdAt)}</span>
+        ${sharedBadge}
       </div>
       <div class="file-actions">
         <button type="button" data-action="share" data-id="${escapeHtml(file.id)}" title="Paylaş" aria-label="Paylaş">↗</button>
@@ -314,6 +319,10 @@ async function shareFile(file) {
 
   await navigator.clipboard?.writeText(data.signedUrl);
   file.shared = true;
+  if (!state.sharedFiles.includes(file.path)) {
+    state.sharedFiles.push(file.path);
+    saveSharedFiles();
+  }
   render();
   showToast("1 saatlik paylaşım linki panoya kopyalandı.");
 }
@@ -338,6 +347,8 @@ async function deleteFile(file) {
     return;
   }
 
+  state.sharedFiles = state.sharedFiles.filter((path) => path !== file.path);
+  saveSharedFiles();
   await loadFiles();
   render();
   showToast("Dosya silindi.");
@@ -373,6 +384,16 @@ function getUsage() {
   return state.files.reduce((sum, file) => sum + file.size, 0);
 }
 
+function getUsagePercent(bytes) {
+  if (bytes === 0) return { label: "0%", meterWidth: "0%" };
+
+  const raw = (bytes / QUOTA_BYTES) * 100;
+  if (raw < 1) return { label: "<1%", meterWidth: "2%" };
+
+  const rounded = Math.min(100, Math.round(raw));
+  return { label: `${rounded}%`, meterWidth: `${rounded}%` };
+}
+
 function formatSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -398,7 +419,20 @@ function sanitizeFileName(value) {
 }
 
 function stripUploadPrefix(value) {
-  return value.replace(/^\d+-/, "");
+  const decoded = value.replace(/_/g, " ");
+  return decoded.replace(/^\d+-/, "");
+}
+
+function loadSharedFiles() {
+  try {
+    return JSON.parse(localStorage.getItem(SHARED_FILES_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveSharedFiles() {
+  localStorage.setItem(SHARED_FILES_KEY, JSON.stringify(state.sharedFiles));
 }
 
 function escapeHtml(value) {
