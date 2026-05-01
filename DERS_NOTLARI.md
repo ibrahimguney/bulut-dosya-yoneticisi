@@ -8,6 +8,58 @@ Canli demo:
 https://ibrahimguney.github.io/bulut-dosya-yoneticisi/
 ```
 
+## Dersi Nasil Kullanmalisin?
+
+Bu dokuman bir okuma metni gibi degil, uygulamali bir egitim notu gibi takip edilmelidir. Her bolumde once kavrami oku, sonra ilgili dosyayi acip kodun projedeki karsiligini incele.
+
+Tavsiye edilen calisma sirasi:
+
+1. Once projeyi yerelde calistir.
+2. Canli demo ile yerel surumu karsilastir.
+3. Her bolumde anlatilan dosyayi ac.
+4. Kod parcasini oku ve uygulamada hangi bolumu etkiledigini bul.
+5. Bolum sonundaki sorulari cevapla.
+6. Mini odevleri kucuk commitler halinde uygula.
+
+## On Kosullar
+
+Bu dersi takip etmek icin su konulara temel seviyede asina olmak yeterlidir:
+
+- HTML etiketleri
+- CSS class kullanimi
+- JavaScript fonksiyonlari
+- `git add`, `git commit`, `git push`
+- GitHub repo mantigi
+- Web tarayicisinda gelistirici konsolu kullanimi
+
+Supabase veya GitHub Actions bilmek zorunlu degildir; ilgili bolumlerde proje uzerinden anlatilir.
+
+## Ogrenme Hedefleri
+
+Bu egitim dokumanini tamamladiginda sunlari yapabilir hale gelmen beklenir:
+
+- Statik bir web uygulamasinin dosya yapisini anlayabilmek
+- HTML, CSS ve JavaScript dosyalarinin sorumluluklarini ayirabilmek
+- Vanilla JavaScript ile basit state yonetimi kurabilmek
+- Supabase Auth ve Storage ile temel islemler yapabilmek
+- Demo modu gibi portfoy odakli bir deneyim tasarlayabilmek
+- GitHub Pages ile statik site yayinlayabilmek
+- Bir projeyi README ve portfoy sayfasi ile sunulabilir hale getirebilmek
+
+## Ders Plani
+
+| Ders | Konu | Uygulama |
+| --- | --- | --- |
+| 1 | Proje fikri ve dosya yapisi | Repo dosyalarini inceleme |
+| 2 | Yerel sunucu | `start-server.cmd` ile calistirma |
+| 3 | HTML iskeleti | Sidebar, auth ve dashboard bolumleri |
+| 4 | CSS tasarimi | Layout, kartlar, responsive yapi |
+| 5 | JavaScript state | `state`, `els`, event listener'lar |
+| 6 | Supabase | Auth, Storage, klasor tablosu |
+| 7 | Demo modu | Hesapsiz portfoy deneyimi |
+| 8 | Deploy | GitHub Pages workflow |
+| 9 | Sunum | README ve portfoye ekleme |
+
 ## 1. Projenin Amaci
 
 Bu projenin hedefi, kullanicinin dosyalarini bulut ortaminda yonetebilecegi profesyonel bir web arayuzu hazirlamaktir.
@@ -579,3 +631,202 @@ Bu proje sonunda su konular pratik edildi:
 - README ve portfoy sunumu hazirlama
 
 Bu nedenle proje, basit bir arayuz calismasindan daha fazlasidir: fikir, gelistirme, veri baglantisi, yayin ve portfoy sunumu adimlarini bir araya getiren uctan uca bir uygulamadir.
+
+## 22. Bolum Sonu Genel Tekrar Sorulari
+
+1. Bu projede HTML, CSS ve JavaScript hangi sorumluluklari ustleniyor?
+2. `state` nesnesi olmasaydi uygulama mantigi nasil zorlasirdi?
+3. Supabase Auth ve Storage projede hangi problemleri cozer?
+4. Demo modu neden gercek kullanici modundan ayrildi?
+5. GitHub Pages ile Vercel arasinda bu proje icin nasil bir fark vardir?
+6. README dosyasi teknik olarak uygulamayi calistirir mi, yoksa sunum gorevi mi gorur?
+7. Portfoye eklemek neden proje gelistirme surecinin bir parcasi sayilabilir?
+8. Bu projeyi daha guvenli yapmak icin hangi ek kontroller gerekir?
+9. Mobil tasarimda en cok hangi bolumler riskli olabilir?
+10. Bu uygulamayi musteriye teslim edilecek seviyeye getirmek icin hangi ozellikleri eklersin?
+
+## 23. Bolum Bazli Kontrol Sorulari
+
+### Proje Fikri
+
+- Bu uygulamanin hedef kullanicisi kimdir?
+- Demo modu neden portfoy projeleri icin onemlidir?
+- Bu proje sadece tasarim projesi mi, yoksa veri baglantisi da olan bir uygulama mi?
+
+### Dosya Yapisi
+
+- `public` klasoru neden onemlidir?
+- `app.js` ile `styles.css` arasindaki sorumluluk farki nedir?
+- GitHub Pages hangi klasoru yayinliyor?
+
+### Yerel Sunucu
+
+- Local server neden gereklidir?
+- `4173` neyi temsil eder?
+- `public/index.html` dosyasi neden otomatik acilir?
+
+### HTML
+
+- `hidden` attribute'u ne ise yarar?
+- `id` ve `class` arasindaki fark nedir?
+- Neden form elemanlarinda `required` kullanildi?
+
+### CSS
+
+- CSS degiskenleri neden kullanildi?
+- Grid layout bu proje icin neden uygundur?
+- Mobil tasarim icin media query neden gereklidir?
+
+### JavaScript
+
+- Merkezi state kullanmak neden faydalidir?
+- `render()` fonksiyonunu her degisiklikten sonra cagirmak ne saglar?
+- `demoMode` ve `user` birlikte nasil kullaniliyor?
+
+### Supabase
+
+- `persistSession` ne ise yarar?
+- Supabase Auth ile Storage arasindaki fark nedir?
+- Publishable key neden frontend tarafinda kullanilabilir?
+
+### Deploy
+
+- GitHub Pages neden backend calistiramaz?
+- Bu proje neden statik yayinlanabiliyor?
+- `public` klasoru neden deploy artifact olarak secildi?
+
+## 24. Uygulamali Odevler
+
+### Odev 1: Demo Dosyasi Ekle
+
+`DEMO_FILES` dizisine yeni bir dosya ekle ve demo modunda gorundugunu kontrol et.
+
+Beklenen sonuc:
+
+- Dosya listede gorunmeli.
+- Sag panelde son hareketlere dusmeli.
+- Depolama kotasi guncellenmeli.
+
+### Odev 2: Yeni Siralama Secenegi
+
+Dosyalari dosya uzantisina gore siralayan yeni bir secenek ekle.
+
+Dokunulacak yerler:
+
+- `public/index.html`
+- `public/app.js`
+
+Beklenen sonuc:
+
+- Select icinde yeni secenek gorunmeli.
+- Secilince dosyalar uzantiya gore siralanmali.
+
+### Odev 3: Bos Durum Metnini Gelistir
+
+Dosya olmayan klasorlerde daha yonlendirici bir mesaj goster.
+
+Ornek:
+
+```text
+Bu klasorde henuz dosya yok. Dosya yukleyerek baslayabilirsin.
+```
+
+### Odev 4: README'ye Ekran Goruntusu Alani Ekle
+
+README icine su basligi ekle:
+
+```md
+## Ekran Goruntusu
+```
+
+Sonra canli uygulamadan bir ekran goruntusu alip bu bolumde kullanmak icin hazirla.
+
+### Odev 5: Portfoy Kartini Gelistir
+
+Portfoy ana sayfasindaki proje kartina 3 maddelik ozellik listesi ekle.
+
+Ornek:
+
+- Demo modu
+- Supabase Storage
+- GitHub Pages deploy
+
+## 25. Uygulama Kontrol Listeleri
+
+### Yerel Calisma Kontrol Listesi
+
+- `start-server.cmd` calisiyor mu?
+- `http://localhost:4173` aciliyor mu?
+- Tarayici konsolunda hata var mi?
+- Demo butonu dashboard'u aciyor mu?
+- Dosya kartlari gorunuyor mu?
+
+### GitHub Pages Kontrol Listesi
+
+- `.github/workflows/pages.yml` dosyasi var mi?
+- GitHub Pages `Source` ayari `GitHub Actions` mi?
+- Actions sekmesinde workflow basarili mi?
+- Canli site `200 OK` donuyor mu?
+- Canli sitede son eklenen ozellik gorunuyor mu?
+
+### README Kontrol Listesi
+
+- Proje adi var mi?
+- Canli demo linki var mi?
+- Ozellik listesi var mi?
+- Kullanilan teknolojiler yaziyor mu?
+- Yerelde calistirma adimi var mi?
+- Deploy bilgisi var mi?
+- Supabase kurulumu anlatiliyor mu?
+
+### Portfoy Kontrol Listesi
+
+- Proje karti ana sayfada gorunuyor mu?
+- Canli demo linki calisiyor mu?
+- GitHub repo linki calisiyor mu?
+- Kart aciklamasi kisa ve anlasilir mi?
+- Kullanilan teknolojiler gorunuyor mu?
+
+## 26. Degerlendirme Rubrigi
+
+Bu proje uzerinden kendini degerlendirmek icin asagidaki tabloyu kullanabilirsin.
+
+| Kriter | Baslangic | Orta | Iyi |
+| --- | --- | --- | --- |
+| HTML yapisi | Elemanlari taniyor | Bolumleri aciklayabiliyor | Yeni bolum ekleyebiliyor |
+| CSS tasarimi | Class'lari buluyor | Layout'u degistirebiliyor | Responsive tasarim yapabiliyor |
+| JavaScript | Fonksiyonlari okuyabiliyor | State ve render mantigini anliyor | Yeni ozellik ekleyebiliyor |
+| Supabase | Auth/Storage ayrimini biliyor | Dosya yukleme akisini anliyor | Policy ve veri modelini tartisabiliyor |
+| Deploy | Pages ayarini biliyor | Workflow'u okuyabiliyor | Hata durumunda debug yapabiliyor |
+| Sunum | README okuyor | README duzenleyebiliyor | Portfoyde projeyi etkili sunabiliyor |
+
+## 27. Egitmen Notlari
+
+Bu proje anlatilirken en iyi ilerleme sekli sudur:
+
+1. Once canli demoyu goster.
+2. Sonra yerel projeyi calistir.
+3. HTML iskeletini acikla.
+4. CSS layout'u uzerinden gorsel yapiyi anlat.
+5. JavaScript `state` nesnesine gec.
+6. Demo modunu acikla.
+7. Supabase'in gercek veri tarafini nasil sagladigini anlat.
+8. GitHub Pages deploy surecini goster.
+9. README ve portfoy sunumunu dersin sonuna koy.
+
+Bu siralama ogrencinin once sonucu gormesini, sonra adim adim nasil yapildigini anlamasini saglar.
+
+## 28. Kapanis
+
+Bu egitim dokumani, bir web uygulamasinin sadece kod yazmaktan ibaret olmadigini gosterir. Basarili bir portfoy projesi icin su adimlar birlikte dusunulmelidir:
+
+- Kullanici deneyimi
+- Temiz dosya yapisi
+- Anlasilir kod
+- Veri baglantisi
+- Demo deneyimi
+- Canli yayin
+- README
+- Portfoy sunumu
+
+Bu projede bu adimlarin tamami uygulandi. Bundan sonraki hedef, ayni yaklasimi baska projelere de tasimaktir.
