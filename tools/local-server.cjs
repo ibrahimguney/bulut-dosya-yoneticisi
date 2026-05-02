@@ -6,6 +6,8 @@ const port = Number(process.env.PORT || 4173);
 const root = path.join(__dirname, "..", "public");
 const apiKey = process.env.OPENAI_API_KEY || "";
 const model = process.env.OPENAI_MODEL || "gpt-5.2";
+const supabaseUrl = process.env.SUPABASE_URL || "https://yqleugywrmevmsjzekdw.supabase.co";
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || "sb_publishable_eA14QrXd4sESvwNwfmfvqg_WwIyuAzI";
 
 const types = {
   ".html": "text/html; charset=utf-8",
@@ -23,6 +25,15 @@ const server = http.createServer((req, res) => {
       ok: true,
       aiEnabled: Boolean(apiKey),
       model: apiKey ? model : null,
+      supabaseEnabled: Boolean(supabaseUrl && supabaseAnonKey),
+    });
+    return;
+  }
+
+  if (url.pathname === "/api/config") {
+    sendJson(res, 200, {
+      supabaseUrl,
+      supabaseAnonKey,
     });
     return;
   }

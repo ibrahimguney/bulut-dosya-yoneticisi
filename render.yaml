@@ -8,3 +8,7 @@ services:
     envVars:
       - key: OPENAI_MODEL
         value: gpt-5.2
+      - key: SUPABASE_URL
+        value: https://yqleugywrmevmsjzekdw.supabase.co
+      - key: SUPABASE_ANON_KEY
+        value: sb_publishable_eA14QrXd4sESvwNwfmfvqg_WwIyuAzI

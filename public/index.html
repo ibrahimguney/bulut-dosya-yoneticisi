@@ -41,6 +41,32 @@
           </a>
         </nav>
 
+        <section class="auth-card" aria-label="Hesap">
+          <form id="authForm" class="auth-form">
+            <div>
+              <strong>Hesap</strong>
+              <p id="authStatus">Supabase baglantisi hazirlaniyor.</p>
+            </div>
+            <label>
+              E-posta
+              <input id="authEmail" type="email" autocomplete="email" placeholder="ornek@email.com" />
+            </label>
+            <label>
+              Sifre
+              <input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="En az 6 karakter" />
+            </label>
+            <div class="auth-actions">
+              <button class="secondary-button" type="submit" data-auth-mode="signin">Giris</button>
+              <button class="secondary-button" type="submit" data-auth-mode="signup">Kayit</button>
+            </div>
+          </form>
+          <div class="account-card" id="accountCard" hidden>
+            <span>Oturum acik</span>
+            <strong id="accountEmail"></strong>
+            <button class="secondary-button" id="signOutButton" type="button">Cikis yap</button>
+          </div>
+        </section>
+
         <section class="status-panel" aria-label="Yayin durumu">
           <div>
             <span class="status-dot" id="statusDot"></span>
@@ -223,7 +249,7 @@
                   <span>3</span>
                   <div>
                     <strong>Veritabani ve hesaplar</strong>
-                    <p>Supabase ile ogretmen hesaplari, siniflar, materyal arsivi ve paylasim linkleri eklenebilir.</p>
+                    <p>Supabase ile ogretmen hesaplari ve materyal arsivi aktiflestirildi; sonraki adim siniflar ve paylasim linkleri.</p>
                   </div>
                 </article>
                 <article>
@@ -240,6 +266,8 @@
               <code>Build Command: npm install</code>
               <code>Start Command: npm start</code>
               <code>Environment: OPENAI_API_KEY</code>
+              <code>Environment: SUPABASE_URL</code>
+              <code>Environment: SUPABASE_ANON_KEY</code>
             </aside>
           </div>
         </section>

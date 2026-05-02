@@ -144,6 +144,7 @@ a {
   color: var(--brand-strong);
 }
 
+.auth-card,
 .status-panel {
   margin-top: auto;
   border: 1px solid var(--line);
@@ -151,6 +152,56 @@ a {
   background: var(--surface);
   padding: 16px;
   box-shadow: 0 12px 28px rgba(23, 32, 42, 0.05);
+}
+
+.auth-card {
+  display: grid;
+  gap: 12px;
+  margin-top: 0;
+}
+
+.auth-form,
+.account-card {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-card p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.auth-card label {
+  font-size: 0.86rem;
+}
+
+.auth-card input {
+  min-height: 38px;
+}
+
+.auth-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.auth-actions .secondary-button,
+.account-card .secondary-button {
+  width: 100%;
+  min-height: 38px;
+}
+
+.account-card span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.account-card strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .status-panel > div {

@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 const STORAGE_KEY = "akillab-materials";
 
 const state = {
@@ -5,6 +7,9 @@ const state = {
   currentMeta: null,
   materials: loadMaterials(),
   apiLive: false,
+  supabase: null,
+  user: null,
+  cloudReady: false,
 };
 
 const els = {
@@ -33,6 +38,13 @@ const els = {
   statusDot: document.querySelector("#statusDot"),
   statusTitle: document.querySelector("#statusTitle"),
   statusCopy: document.querySelector("#statusCopy"),
+  authForm: document.querySelector("#authForm"),
+  authEmail: document.querySelector("#authEmail"),
+  authPassword: document.querySelector("#authPassword"),
+  authStatus: document.querySelector("#authStatus"),
+  accountCard: document.querySelector("#accountCard"),
+  accountEmail: document.querySelector("#accountEmail"),
+  signOut: document.querySelector("#signOutButton"),
   toast: document.querySelector("#toast"),
 };
 
@@ -47,6 +59,8 @@ els.save.addEventListener("click", saveOutput);
 els.librarySearch.addEventListener("input", renderLibrary);
 els.libraryTypeFilter.addEventListener("change", renderLibrary);
 els.exportLibrary.addEventListener("click", exportLibrary);
+els.authForm.addEventListener("submit", handleAuth);
+els.signOut.addEventListener("click", signOut);
 window.addEventListener("hashchange", syncView);
 
 init();
@@ -55,6 +69,7 @@ async function init() {
   syncView();
   renderLibrary();
   await checkHealth();
+  await configureSupabase();
 }
 
 async function checkHealth() {
@@ -73,6 +88,100 @@ async function checkHealth() {
     ? "Render uzerindeki API gercek AI yanitlari uretiyor."
     : "OPENAI_API_KEY eklenince ayni panel gercek AI ile calisir.";
   els.modePill.textContent = state.apiLive ? "AI aktif" : "Demo mod";
+}
+
+async function configureSupabase() {
+  try {
+    const response = await fetch("/api/config");
+    const config = await response.json();
+    if (!config.supabaseUrl || !config.supabaseAnonKey) {
+      setAuthStatus("Supabase ayari bekleniyor.");
+      return;
+    }
+
+    state.supabase = createClient(config.supabaseUrl, config.supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    });
+    state.cloudReady = true;
+
+    const { data } = await state.supabase.auth.getSession();
+    state.user = data.session?.user || null;
+    state.supabase.auth.onAuthStateChange(async (_event, session) => {
+      state.user = session?.user || null;
+      if (state.user) await loadCloudMaterials();
+      if (!state.user) state.materials = loadMaterials();
+      renderAuth();
+      renderLibrary();
+    });
+
+    if (state.user) await loadCloudMaterials();
+    renderAuth();
+    renderLibrary();
+  } catch {
+    setAuthStatus("Supabase baglantisi kurulamadi.");
+    renderAuth();
+  }
+}
+
+async function handleAuth(event) {
+  event.preventDefault();
+  if (!state.supabase) {
+    showToast("Supabase henuz hazir degil.");
+    return;
+  }
+
+  const mode = event.submitter?.dataset.authMode || "signin";
+  const email = els.authEmail.value.trim();
+  const password = els.authPassword.value;
+  if (!email || !password) {
+    showToast("E-posta ve sifre gerekli.");
+    return;
+  }
+
+  setAuthStatus("Islem yapiliyor...");
+  const result =
+    mode === "signup"
+      ? await state.supabase.auth.signUp({ email, password })
+      : await state.supabase.auth.signInWithPassword({ email, password });
+
+  if (result.error) {
+    setAuthStatus(translateAuthError(result.error.message));
+    showToast(translateAuthError(result.error.message));
+    return;
+  }
+
+  state.user = result.data.user || result.data.session?.user || state.user;
+  if (state.user) await loadCloudMaterials();
+  renderAuth();
+  renderLibrary();
+  showToast(mode === "signup" ? "Kayit olusturuldu." : "Giris yapildi.");
+}
+
+async function signOut() {
+  if (state.supabase) await state.supabase.auth.signOut();
+  state.user = null;
+  state.materials = loadMaterials();
+  renderAuth();
+  renderLibrary();
+  showToast("Oturum kapatildi.");
+}
+
+function renderAuth() {
+  els.authForm.hidden = Boolean(state.user);
+  els.accountCard.hidden = !state.user;
+  els.accountEmail.textContent = state.user?.email || "";
+  if (state.user) {
+    setAuthStatus("");
+    return;
+  }
+  setAuthStatus(state.cloudReady ? "Giris yapinca materyaller hesaba kaydedilir." : "Supabase ayari bekleniyor.");
+}
+
+function setAuthStatus(message) {
+  els.authStatus.textContent = message;
 }
 
 async function generateMaterial(event) {
@@ -231,7 +340,7 @@ function inlineFormat(value) {
     .replace(/`(.+?)`/g, "<code>$1</code>");
 }
 
-function saveOutput() {
+async function saveOutput() {
   if (!state.currentOutput || !state.currentMeta) {
     showToast("Kaydedilecek icerik yok.");
     return;
@@ -244,10 +353,33 @@ function saveOutput() {
     meta: state.currentMeta,
   };
 
+  if (state.user && state.supabase) {
+    const { data, error } = await state.supabase
+      .from("materials")
+      .insert({
+        user_id: state.user.id,
+        title: item.title,
+        content: item.content,
+        meta: item.meta,
+      })
+      .select("id, title, content, meta, created_at")
+      .single();
+
+    if (error) {
+      showToast(error.message || "Materyal Supabase'e kaydedilemedi.");
+      return;
+    }
+
+    state.materials = [normalizeMaterial(data), ...state.materials];
+    renderLibrary();
+    showToast("Materyal Supabase'e kaydedildi.");
+    return;
+  }
+
   state.materials = [item, ...state.materials].slice(0, 80);
   saveMaterials();
   renderLibrary();
-  showToast("Materyal kutuphaneye kaydedildi.");
+  showToast("Materyal bu tarayiciya kaydedildi.");
 }
 
 async function copyOutput() {
@@ -366,7 +498,7 @@ function libraryCardTemplate(item) {
   `;
 }
 
-function handleNavigation(event) {
+async function handleNavigation(event) {
   const link = event.target.closest("[data-view-link]");
   if (link) {
     document.querySelectorAll("[data-view-link]").forEach((item) => item.classList.remove("active"));
@@ -390,8 +522,16 @@ function handleNavigation(event) {
   }
 
   if (action.dataset.libraryAction === "delete") {
+    if (state.user && state.supabase) {
+      const { error } = await state.supabase.from("materials").delete().eq("id", item.id);
+      if (error) {
+        showToast(error.message || "Materyal silinemedi.");
+        return;
+      }
+    }
+
     state.materials = state.materials.filter((material) => material.id !== item.id);
-    saveMaterials();
+    if (!state.user) saveMaterials();
     renderLibrary();
     showToast("Materyal silindi.");
   }
@@ -547,6 +687,34 @@ function loadMaterials() {
   }
 }
 
+async function loadCloudMaterials() {
+  if (!state.user || !state.supabase) return;
+
+  const { data, error } = await state.supabase
+    .from("materials")
+    .select("id, title, content, meta, created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    showToast(error.message || "Supabase materyalleri okunamadi.");
+    return;
+  }
+
+  state.materials = (data || []).map(normalizeMaterial);
+}
+
+function normalizeMaterial(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    content: row.content,
+    meta: {
+      ...(row.meta || {}),
+      createdAt: row.meta?.createdAt || row.created_at || new Date().toISOString(),
+    },
+  };
+}
+
 function saveMaterials() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state.materials));
 }
@@ -575,6 +743,15 @@ function escapeHtml(value) {
     const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
     return entities[char];
   });
+}
+
+function translateAuthError(message) {
+  const lower = message.toLocaleLowerCase("tr-TR");
+  if (lower.includes("invalid login credentials")) return "E-posta veya sifre hatali.";
+  if (lower.includes("email not confirmed")) return "E-posta dogrulamasi gerekiyor.";
+  if (lower.includes("user already registered")) return "Bu e-posta zaten kayitli.";
+  if (lower.includes("password")) return "Sifre en az 6 karakter olmali.";
+  return message;
 }
 
 function showToast(message) {
