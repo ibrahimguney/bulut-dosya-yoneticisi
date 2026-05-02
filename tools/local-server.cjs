@@ -18,6 +18,13 @@ const types = {
 };
 
 const server = http.createServer((req, res) => {
+  setCorsHeaders(res);
+  if (req.method === "OPTIONS") {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
   const url = new URL(req.url, `http://localhost:${port}`);
 
   if (url.pathname === "/api/health") {
@@ -308,4 +315,10 @@ function typeLabel(type) {
 function sendJson(res, status, data) {
   res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
   res.end(JSON.stringify(data));
+}
+
+function setCorsHeaders(res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
 }

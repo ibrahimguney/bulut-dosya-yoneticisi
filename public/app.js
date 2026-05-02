@@ -1,6 +1,8 @@
 ﻿import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const STORAGE_KEY = "akillab-materials";
+const RENDER_API_ORIGIN = "https://akillab-ai-egitim-paneli.onrender.com";
+const API_ORIGIN = location.hostname.endsWith("github.io") ? RENDER_API_ORIGIN : "";
 
 const state = {
   currentOutput: "",
@@ -80,7 +82,7 @@ async function init() {
 
 async function checkHealth() {
   try {
-    const response = await fetch("/api/health");
+    const response = await fetch(apiUrl("/api/health"));
     const data = await response.json();
     state.apiLive = Boolean(data.aiEnabled);
   } catch {
@@ -98,7 +100,7 @@ async function checkHealth() {
 
 async function configureSupabase() {
   try {
-    const response = await fetch("/api/config");
+    const response = await fetch(apiUrl("/api/config"));
     const config = await response.json();
     if (!config.supabaseUrl || !config.supabaseAnonKey) {
       setAuthStatus("Supabase ayarı bekleniyor.");
@@ -203,7 +205,7 @@ async function generateMaterial(event) {
 
   setLoading(true);
   try {
-    const response = await fetch("/api/generate", {
+    const response = await fetch(apiUrl("/api/generate"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -234,6 +236,10 @@ async function generateMaterial(event) {
   } finally {
     setLoading(false);
   }
+}
+
+function apiUrl(path) {
+  return `${API_ORIGIN}${path}`;
 }
 
 function readForm() {
