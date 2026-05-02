@@ -11,6 +11,9 @@ create table if not exists public.materials (
 alter table public.materials
 add column if not exists share_id text unique;
 
+alter table public.materials
+alter column user_id set default auth.uid();
+
 alter table public.materials enable row level security;
 
 drop policy if exists "Users can read own materials" on public.materials;

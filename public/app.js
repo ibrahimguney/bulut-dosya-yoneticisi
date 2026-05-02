@@ -363,7 +363,6 @@ async function saveOutput() {
 
   if (state.user && state.supabase) {
     const payload = {
-        user_id: state.user.id,
         title: item.title,
         content: item.content,
         meta: item.meta,
