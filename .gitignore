@@ -4,3 +4,4 @@ server.log
 server.err
 server.*.log
 *.local
+ai-evolution-lab/
