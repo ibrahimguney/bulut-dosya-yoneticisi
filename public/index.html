@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AkilLab | AI Egitim Paneli</title>
+    <meta
+      name="description"
+      content="AI destekli ders plani, quiz, ozet ve calisma materyali ureten egitim paneli."
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Uygulama menusu">
+        <a class="brand" href="#studio" aria-label="AkilLab ana ekran">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img">
+              <path d="M12 2.4 20.7 7v9.9L12 21.6 3.3 16.9V7L12 2.4Zm0 3.2L6.2 8.7v6.4l5.8 3.1 5.8-3.1V8.7L12 5.6Zm0 3.1a3.3 3.3 0 1 1 0 6.6 3.3 3.3 0 0 1 0-6.6Z" />
+            </svg>
+          </span>
+          <span>
+            <strong>AkilLab</strong>
+            <small>AI egitim paneli</small>
+          </span>
+        </a>
+
+        <nav class="nav-list">
+          <a class="nav-item active" href="#studio" data-view-link="studio">
+            <span aria-hidden="true">✦</span>
+            <span>Uretim studyosu</span>
+          </a>
+          <a class="nav-item" href="#library" data-view-link="library">
+            <span aria-hidden="true">▤</span>
+            <span>Materyal kutuphanesi</span>
+          </a>
+          <a class="nav-item" href="#roadmap" data-view-link="roadmap">
+            <span aria-hidden="true">✓</span>
+            <span>Gelistirme plani</span>
+          </a>
+        </nav>
+
+        <section class="status-panel" aria-label="Yayin durumu">
+          <div>
+            <span class="status-dot" id="statusDot"></span>
+            <strong id="statusTitle">Demo mod</strong>
+          </div>
+          <p id="statusCopy">API anahtari eklenince ayni panel gercek AI ile calisir.</p>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Surekli yayinda gelistirilebilir panel</p>
+            <h1>AI ile ders icerigi, quiz ve calisma materyali uret.</h1>
+          </div>
+          <div class="top-actions">
+            <button class="secondary-button" id="seedButton" type="button">Ornek doldur</button>
+            <a class="primary-button" href="#studio">Yeni icerik</a>
+          </div>
+        </header>
+
+        <section class="stats-grid" aria-label="Ozet">
+          <article class="stat">
+            <span>Kayitli materyal</span>
+            <strong id="savedCount">0</strong>
+          </article>
+          <article class="stat">
+            <span>Uretim turu</span>
+            <strong>6</strong>
+          </article>
+          <article class="stat">
+            <span>Yayin modeli</span>
+            <strong>Render</strong>
+          </article>
+        </section>
+
+        <section class="view-panel active" id="studioView">
+          <div class="studio-grid">
+            <form class="generator-panel" id="generatorForm">
+              <div class="section-title">
+                <div>
+                  <p class="eyebrow">Uretim studyosu</p>
+                  <h2>Yeni egitim materyali</h2>
+                </div>
+                <span class="mode-pill" id="modePill">Hazir</span>
+              </div>
+
+              <label>
+                Konu
+                <input id="topicInput" name="topic" type="text" placeholder="Orn. Fotosentez, Osmanli'da Islahatlar" required />
+              </label>
+
+              <div class="form-row">
+                <label>
+                  Seviye
+                  <select id="levelSelect" name="level">
+                    <option>Ortaokul</option>
+                    <option>Lise</option>
+                    <option>Universite</option>
+                    <option>Yetiskin egitimi</option>
+                  </select>
+                </label>
+                <label>
+                  Materyal turu
+                  <select id="typeSelect" name="type">
+                    <option value="lesson">Ders plani</option>
+                    <option value="quiz">Quiz</option>
+                    <option value="summary">Konu ozeti</option>
+                    <option value="flashcards">Kartlar</option>
+                    <option value="assignment">Odev</option>
+                    <option value="rubric">Rubrik</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="form-row">
+                <label>
+                  Sure
+                  <select id="durationSelect" name="duration">
+                    <option>20 dakika</option>
+                    <option>40 dakika</option>
+                    <option>60 dakika</option>
+                    <option>Haftalik plan</option>
+                  </select>
+                </label>
+                <label>
+                  Ton
+                  <select id="toneSelect" name="tone">
+                    <option>Sade ve anlasilir</option>
+                    <option>Akademik</option>
+                    <option>Oyunlastirilmis</option>
+                    <option>Sinav odakli</option>
+                  </select>
+                </label>
+              </div>
+
+              <label>
+                Hedef veya notlar
+                <textarea
+                  id="goalInput"
+                  name="goal"
+                  rows="5"
+                  placeholder="Orn. 8. sinif ogrencileri icin, 5 soruluk mini quiz ve kisa tekrar etkinligi olsun."
+                ></textarea>
+              </label>
+
+              <div class="generator-actions">
+                <button class="primary-button" id="generateButton" type="submit">Icerik uret</button>
+                <button class="secondary-button" id="clearButton" type="button">Temizle</button>
+              </div>
+            </form>
+
+            <section class="output-panel" aria-label="Uretilen icerik">
+              <div class="section-title">
+                <div>
+                  <p class="eyebrow">Cikti</p>
+                  <h2 id="outputTitle">Hazir icerik burada gorunur</h2>
+                </div>
+                <div class="output-actions">
+                  <button class="icon-button" id="copyButton" type="button" title="Kopyala" aria-label="Kopyala">CP</button>
+                  <button class="icon-button" id="downloadButton" type="button" title="Markdown indir" aria-label="Markdown indir">DL</button>
+                  <button class="icon-button" id="printButton" type="button" title="Yazdir" aria-label="Yazdir">PR</button>
+                  <button class="icon-button" id="saveButton" type="button" title="Kaydet" aria-label="Kaydet">+</button>
+                </div>
+              </div>
+              <div class="output-box" id="outputBox">
+                <div class="empty-state">
+                  <strong>Bir konu yazip uretime basla.</strong>
+                  <span>Ders plani, quiz, ozet veya kart seti olusturabilirsin.</span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view-panel" id="libraryView">
+          <div class="section-title library-head">
+            <div>
+              <p class="eyebrow">Kutuphanem</p>
+              <h2>Kayitli materyaller</h2>
+            </div>
+            <div class="library-tools">
+              <input id="librarySearch" type="search" placeholder="Materyal ara" />
+              <select id="libraryTypeFilter" aria-label="Materyal turu filtrele">
+                <option value="all">Tum turler</option>
+                <option value="lesson">Ders plani</option>
+                <option value="quiz">Quiz</option>
+                <option value="summary">Konu ozeti</option>
+                <option value="flashcards">Kartlar</option>
+                <option value="assignment">Odev</option>
+                <option value="rubric">Rubrik</option>
+              </select>
+              <button class="secondary-button" id="exportLibraryButton" type="button">Disa aktar</button>
+            </div>
+          </div>
+          <div class="library-grid" id="libraryGrid"></div>
+        </section>
+
+        <section class="view-panel" id="roadmapView">
+          <div class="roadmap-layout">
+            <section class="roadmap-panel">
+              <p class="eyebrow">Yayin ve buyume</p>
+              <h2>Bu paneli nasil gelistiririz?</h2>
+              <div class="roadmap-list">
+                <article>
+                  <span>1</span>
+                  <div>
+                    <strong>Render yayini</strong>
+                    <p>Node Web Service olarak surekli acik kalir. Statik dosyalar ve API ayni servisten calisir.</p>
+                  </div>
+                </article>
+                <article>
+                  <span>2</span>
+                  <div>
+                    <strong>Gercek AI baglantisi</strong>
+                    <p>Render Environment bolumune `OPENAI_API_KEY` eklenince `/api/generate` gercek modelden yanit alir.</p>
+                  </div>
+                </article>
+                <article>
+                  <span>3</span>
+                  <div>
+                    <strong>Veritabani ve hesaplar</strong>
+                    <p>Supabase ile ogretmen hesaplari, siniflar, materyal arsivi ve paylasim linkleri eklenebilir.</p>
+                  </div>
+                </article>
+                <article>
+                  <span>4</span>
+                  <div>
+                    <strong>Urunlesme</strong>
+                    <p>PDF cikti, ogrenci modulu, seviye analizi ve kurum paneliyle ticari urune donusebilir.</p>
+                  </div>
+                </article>
+              </div>
+            </section>
+            <aside class="deploy-card">
+              <span>Render ayari</span>
+              <code>Build Command: npm install</code>
+              <code>Start Command: npm start</code>
+              <code>Environment: OPENAI_API_KEY</code>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

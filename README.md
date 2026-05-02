@@ -1,49 +1,66 @@
-# Öğretici Paket (Tutorial Package)
+# AkilLab AI Egitim Paneli
 
-Bu depo, GitHub üzerinde **öğretici içerik** yayınlamak için hazır bir paket şablonu sunar.
-Aşağıdakileri içerir:
-- Python paketi (`src/tutorial_package`)
-- Örnekler (`examples/`)
-- Dokümantasyon sitesi (MkDocs, `docs/` + `mkdocs.yml`)
-- GitHub Actions ile **GitHub Pages**'a otomatik yayın (docs.yml)
-- (İsteğe bağlı) PyPI yayın iş akışı (publish.yml)
+Render uzerinde surekli yayinda kalabilecek AI destekli egitim icerigi paneli.
 
-## Hızlı Başlangıç
+## Ozellikler
+
+- Ders plani, quiz, konu ozeti, kart seti, odev ve rubrik uretimi
+- Render Web Service uzerinden guvenli AI endpoint'i
+- `OPENAI_API_KEY` yoksa demo mod
+- Kayitli materyal kutuphanesi
+- Arama, tur filtresi, kopyalama, Markdown indirme, yazdirma ve disa aktarma
+- Tek Node servisiyle frontend ve `/api/generate` endpoint'i
+
+## Yerelde Calistirma
+
 ```bash
-# Geliştirme ortamı
-python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-
-# Yerelde dokümanları çalıştır
-mkdocs serve
-
-# Örnek kodu çalıştır
-python -m tutorial_package
+npm.cmd start
 ```
 
-## Yapı
-```
-tutorial-package/
-├── README.md
-├── requirements.txt
-├── pyproject.toml
-├── mkdocs.yml
-├── docs/
-│   ├── index.md
-│   ├── installation.md
-│   └── usage.md
-├── src/
-│   └── tutorial_package/
-│       ├── __init__.py
-│       └── main.py
-├── examples/
-│   └── quickstart.ipynb
-└── .github/
-    └── workflows/
-        ├── docs.yml
-        └── publish.yml
+Adres:
+
+```text
+http://localhost:4173
 ```
 
-## Yayın
-- **Doküman**: `main` dalına itince otomatik **GitHub Pages**’e deploy olur.
-- **PyPI**: `publish.yml` iş akışını manuel tetikleyerek ya da bir sürüm etiketi (`v0.1.0`) ile yayınlayabilirsiniz.
+Gercek AI uretimi icin ortam degiskenleri:
+
+```text
+OPENAI_API_KEY=...
+OPENAI_MODEL=gpt-5.2
+```
+
+Anahtar yoksa uygulama demo icerik uretir.
+
+## Render Kurulumu
+
+Render'da servis tipi:
+
+```text
+New > Web Service
+```
+
+Ayarlar:
+
+```text
+Runtime: Node
+Build Command: npm install
+Start Command: npm start
+```
+
+Environment bolumune ekle:
+
+```text
+OPENAI_API_KEY = senin OpenAI API anahtarin
+OPENAI_MODEL = gpt-5.2
+```
+
+`render.yaml` dosyasi Blueprint olarak da kullanilabilir.
+
+## Gelistirme Plani
+
+1. Supabase Auth ile ogretmen hesaplari
+2. Materyallerin veritabaninda saklanmasi
+3. Sinif ve ogrenci modulu
+4. PDF cikti ve paylasim linkleri
+5. Kurum paneli ve abonelik sistemi
