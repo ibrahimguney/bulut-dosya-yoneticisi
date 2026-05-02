@@ -47,6 +47,9 @@ const els = {
   accountCard: document.querySelector("#accountCard"),
   accountEmail: document.querySelector("#accountEmail"),
   signOut: document.querySelector("#signOutButton"),
+  shareModal: document.querySelector("#shareModal"),
+  shareUrlInput: document.querySelector("#shareUrlInput"),
+  shareOpenLink: document.querySelector("#shareOpenLink"),
   toast: document.querySelector("#toast"),
 };
 
@@ -553,6 +556,18 @@ function libraryCardTemplate(item) {
   `;
 }
 async function handleNavigation(event) {
+  const closeShare = event.target.closest("[data-close-share]");
+  if (closeShare) {
+    hideShareLink();
+    return;
+  }
+
+  const copyShare = event.target.closest("[data-copy-share]");
+  if (copyShare) {
+    await copyShareLink();
+    return;
+  }
+
   const link = event.target.closest("[data-view-link]");
   if (link) {
     document.querySelectorAll("[data-view-link]").forEach((item) => item.classList.remove("active"));
@@ -605,8 +620,9 @@ async function shareMaterial(item) {
   const shareId = item.shareId || crypto.randomUUID();
   if (item.shareId) {
     const url = `${location.origin}${location.pathname}#share=${encodeURIComponent(item.shareId)}`;
-    await navigator.clipboard?.writeText(url);
-    showToast(`Paylaşım linki kopyalandı: ${url}`);
+    await navigator.clipboard?.writeText(url).catch(() => undefined);
+    showShareLink(url);
+    showToast("Paylaşım linki hazır ve kopyalandı.");
     return;
   }
 
@@ -625,9 +641,33 @@ async function shareMaterial(item) {
   const updated = normalizeMaterial(data);
   state.materials = state.materials.map((material) => (material.id === updated.id ? updated : material));
   const url = `${location.origin}${location.pathname}#share=${encodeURIComponent(updated.shareId)}`;
-  await navigator.clipboard?.writeText(url);
+  await navigator.clipboard?.writeText(url).catch(() => undefined);
   renderLibrary();
-  showToast(`Paylaşım linki kopyalandı: ${url}`);
+  showShareLink(url);
+  showToast("Paylaşım linki hazır ve kopyalandı.");
+}
+
+function showShareLink(url) {
+  els.shareUrlInput.value = url;
+  els.shareOpenLink.href = url;
+  els.shareModal.hidden = false;
+  document.body.classList.add("modal-open");
+  window.setTimeout(() => {
+    els.shareUrlInput.focus();
+    els.shareUrlInput.select();
+  }, 0);
+}
+
+function hideShareLink() {
+  els.shareModal.hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
+async function copyShareLink() {
+  if (!els.shareUrlInput.value) return;
+  await navigator.clipboard?.writeText(els.shareUrlInput.value).catch(() => undefined);
+  els.shareUrlInput.select();
+  showToast("Paylaşım linki yeniden kopyalandı.");
 }
 
 function syncView() {

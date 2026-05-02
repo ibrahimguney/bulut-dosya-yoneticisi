@@ -632,6 +632,78 @@ textarea:focus {
   flex: 1;
 }
 
+.modal-open {
+  overflow: hidden;
+}
+
+.share-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.share-modal[hidden] {
+  display: none;
+}
+
+.share-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(17, 24, 39, 0.42);
+}
+
+.share-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(620px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 24px 70px rgba(23, 32, 42, 0.2);
+  padding: 20px;
+}
+
+.share-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.share-dialog-head span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.share-dialog-head strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.3rem;
+}
+
+.share-dialog p {
+  margin: 14px 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.share-link-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.share-link-row input {
+  min-width: 0;
+}
+
 .roadmap-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
@@ -770,6 +842,10 @@ textarea:focus {
 
   .stats-grid,
   .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .share-link-row {
     grid-template-columns: 1fr;
   }
 }

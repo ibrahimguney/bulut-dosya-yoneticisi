@@ -275,6 +275,24 @@
       </main>
     </div>
 
+    <div class="share-modal" id="shareModal" hidden>
+      <button class="share-backdrop" type="button" data-close-share aria-label="Payla&#351;&#305;m penceresini kapat"></button>
+      <section class="share-dialog" role="dialog" aria-modal="true" aria-labelledby="shareDialogTitle">
+        <div class="share-dialog-head">
+          <div>
+            <span>Payla&#351;&#305;m linki</span>
+            <strong id="shareDialogTitle">Materyal payla&#351;&#305;ma haz&#305;r</strong>
+          </div>
+          <button class="icon-button" type="button" data-close-share aria-label="Kapat">X</button>
+        </div>
+        <p>Bu ba&#287;lant&#305;y&#305; kopyalay&#305;p &#246;&#287;renci veya ekip arkada&#351;lar&#305;na g&#246;nderebilirsin.</p>
+        <div class="share-link-row">
+          <input id="shareUrlInput" type="text" readonly aria-label="Payla&#351;&#305;m linki" />
+          <button class="primary-button" type="button" data-copy-share>Linki kopyala</button>
+        </div>
+        <a class="secondary-button" id="shareOpenLink" href="#" target="_blank" rel="noopener">Linki a&#231;</a>
+      </section>
+    </div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script type="module" src="app.js"></script>
   </body>
