@@ -157,11 +157,12 @@ async function handleAuth(event) {
     return;
   }
 
-  state.user = result.data.user || result.data.session?.user || state.user;
+  const sessionResult = await state.supabase.auth.getSession();
+  state.user = result.data.session?.user || sessionResult.data.session?.user || result.data.user || state.user;
   if (state.user) await loadCloudMaterials();
   renderAuth();
   renderLibrary();
-  showToast(mode === "signup" ? "Kayıt oluşturuldu." : "Giriş yapıldı.");
+  showToast(state.user ? "Giriş yapıldı." : "Kayıt oluşturuldu. E-posta doğrulaması gerekiyorsa gelen kutunu kontrol et.");
 }
 
 async function signOut() {
@@ -399,7 +400,7 @@ async function saveOutput() {
   }
   saveMaterials();
   renderLibrary();
-  showToast("Materyal bu tarayıcıya kaydedildi.");
+  showToast(state.cloudReady ? "Oturum açılmadığı için materyal bu tarayıcıya kaydedildi." : "Materyal bu tarayıcıya kaydedildi.");
 }
 
 function toggleOutputEditor() {
