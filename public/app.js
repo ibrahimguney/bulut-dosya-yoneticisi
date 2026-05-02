@@ -5,6 +5,7 @@ const STORAGE_KEY = "akillab-materials";
 const state = {
   currentOutput: "",
   currentMeta: null,
+  currentMaterialId: null,
   materials: loadMaterials(),
   apiLive: false,
   supabase: null,
@@ -28,6 +29,7 @@ const els = {
   copy: document.querySelector("#copyButton"),
   download: document.querySelector("#downloadButton"),
   print: document.querySelector("#printButton"),
+  editOutput: document.querySelector("#editOutputButton"),
   save: document.querySelector("#saveButton"),
   savedCount: document.querySelector("#savedCount"),
   libraryGrid: document.querySelector("#libraryGrid"),
@@ -55,6 +57,7 @@ els.seed.addEventListener("click", fillExample);
 els.copy.addEventListener("click", copyOutput);
 els.download.addEventListener("click", downloadOutput);
 els.print.addEventListener("click", printOutput);
+els.editOutput.addEventListener("click", toggleOutputEditor);
 els.save.addEventListener("click", saveOutput);
 els.librarySearch.addEventListener("input", renderLibrary);
 els.libraryTypeFilter.addEventListener("change", renderLibrary);
@@ -118,6 +121,7 @@ async function configureSupabase() {
     });
 
     if (state.user) await loadCloudMaterials();
+    await loadSharedMaterialFromHash();
     renderAuth();
     renderLibrary();
   } catch {
@@ -204,6 +208,7 @@ async function generateMaterial(event) {
     if (!response.ok) throw new Error(data.error || "Icerik uretilemedi.");
 
     state.currentOutput = data.content;
+    state.currentMaterialId = null;
     state.currentMeta = {
       ...payload,
       source: data.source || "demo",
@@ -217,6 +222,7 @@ async function generateMaterial(event) {
   } catch (error) {
     const fallback = buildDemoMaterial(payload);
     state.currentOutput = fallback;
+    state.currentMaterialId = null;
     state.currentMeta = { ...payload, source: "demo", createdAt: new Date().toISOString() };
     els.outputTitle.textContent = `${typeLabel(payload.type)}: ${payload.topic}`;
     renderOutput(fallback);
@@ -245,6 +251,7 @@ function setLoading(isLoading) {
 
 function renderOutput(markdown) {
   els.outputBox.innerHTML = `<article class="markdown-output">${markdownToHtml(markdown)}</article>`;
+  els.editOutput.textContent = "ED";
 }
 
 function markdownToHtml(markdown) {
@@ -341,6 +348,7 @@ function inlineFormat(value) {
 }
 
 async function saveOutput() {
+  syncOutputEditor();
   if (!state.currentOutput || !state.currentMeta) {
     showToast("Kaydedilecek içerik yok.");
     return;
@@ -354,15 +362,20 @@ async function saveOutput() {
   };
 
   if (state.user && state.supabase) {
-    const { data, error } = await state.supabase
-      .from("materials")
-      .insert({
+    const payload = {
         user_id: state.user.id,
         title: item.title,
         content: item.content,
         meta: item.meta,
-      })
-      .select("id, title, content, meta, created_at")
+    };
+
+    const wasUpdate = Boolean(state.currentMaterialId);
+    const query = wasUpdate
+      ? state.supabase.from("materials").update(payload).eq("id", state.currentMaterialId)
+      : state.supabase.from("materials").insert(payload);
+
+    const { data, error } = await query
+      .select("id, title, content, meta, created_at, share_id")
       .single();
 
     if (error) {
@@ -370,16 +383,51 @@ async function saveOutput() {
       return;
     }
 
-    state.materials = [normalizeMaterial(data), ...state.materials];
+    const saved = normalizeMaterial(data);
+    state.currentMaterialId = saved.id;
+    state.materials = [saved, ...state.materials.filter((material) => material.id !== saved.id)];
     renderLibrary();
-    showToast("Materyal Supabase'e kaydedildi.");
+    showToast(wasUpdate ? "Materyal güncellendi." : "Materyal Supabase'e kaydedildi.");
     return;
   }
 
-  state.materials = [item, ...state.materials].slice(0, 80);
+  if (state.currentMaterialId) {
+    item.id = state.currentMaterialId;
+    state.materials = [item, ...state.materials.filter((material) => material.id !== item.id)].slice(0, 80);
+  } else {
+    state.currentMaterialId = item.id;
+    state.materials = [item, ...state.materials].slice(0, 80);
+  }
   saveMaterials();
   renderLibrary();
   showToast("Materyal bu tarayıcıya kaydedildi.");
+}
+
+function toggleOutputEditor() {
+  if (!state.currentOutput) {
+    showToast("Düzenlenecek içerik yok.");
+    return;
+  }
+
+  const editor = document.querySelector("#outputEditor");
+  if (editor) {
+    state.currentOutput = editor.value;
+    renderOutput(state.currentOutput);
+    showToast("Düzenleme önizlemeye alındı.");
+    return;
+  }
+
+  els.outputBox.innerHTML = `<textarea class="output-editor" id="outputEditor" aria-label="İçeriği düzenle">${escapeHtml(state.currentOutput)}</textarea>`;
+  els.editOutput.textContent = "OK";
+  document.querySelector("#outputEditor").focus();
+}
+
+function syncOutputEditor() {
+  const editor = document.querySelector("#outputEditor");
+  if (editor) {
+    state.currentOutput = editor.value;
+    renderOutput(state.currentOutput);
+  }
 }
 
 async function copyOutput() {
@@ -437,6 +485,7 @@ function clearStudio() {
   els.form.reset();
   state.currentOutput = "";
   state.currentMeta = null;
+  state.currentMaterialId = null;
   els.outputTitle.textContent = "Hazır içerik burada görünür";
   els.outputBox.innerHTML = `
     <div class="empty-state">
@@ -492,6 +541,7 @@ function libraryCardTemplate(item) {
       <small>${escapeHtml(item.meta.level)} · ${escapeHtml(date)} · ${escapeHtml(item.meta.source)}</small>
       <div class="card-actions">
         <button class="secondary-button" type="button" data-library-action="open" data-id="${item.id}">Ac</button>
+        <button class="secondary-button" type="button" data-library-action="share" data-id="${item.id}">Paylaş</button>
         <button class="secondary-button" type="button" data-library-action="delete" data-id="${item.id}">Sil</button>
       </div>
     </article>
@@ -515,10 +565,15 @@ async function handleNavigation(event) {
   if (action.dataset.libraryAction === "open") {
     state.currentOutput = item.content;
     state.currentMeta = item.meta;
+    state.currentMaterialId = item.id;
     els.outputTitle.textContent = item.title;
     renderOutput(item.content);
     location.hash = "#studio";
-    showToast("Materyal acildi.");
+    showToast("Materyal açıldı.");
+  }
+
+  if (action.dataset.libraryAction === "share") {
+    await shareMaterial(item);
   }
 
   if (action.dataset.libraryAction === "delete") {
@@ -535,6 +590,33 @@ async function handleNavigation(event) {
     renderLibrary();
     showToast("Materyal silindi.");
   }
+}
+
+async function shareMaterial(item) {
+  if (!state.user || !state.supabase) {
+    showToast("Paylaşım linki için giriş yapıp materyali Supabase'e kaydetmelisin.");
+    return;
+  }
+
+  const shareId = item.shareId || crypto.randomUUID();
+  const { data, error } = await state.supabase
+    .from("materials")
+    .update({ share_id: shareId })
+    .eq("id", item.id)
+    .select("id, title, content, meta, created_at, share_id")
+    .single();
+
+  if (error) {
+    showToast(error.message || "Paylaşım linki oluşturulamadı.");
+    return;
+  }
+
+  const updated = normalizeMaterial(data);
+  state.materials = state.materials.map((material) => (material.id === updated.id ? updated : material));
+  const url = `${location.origin}${location.pathname}#share=${encodeURIComponent(updated.shareId)}`;
+  await navigator.clipboard?.writeText(url);
+  renderLibrary();
+  showToast("Paylaşım linki panoya kopyalandı.");
 }
 
 function syncView() {
@@ -692,7 +774,7 @@ async function loadCloudMaterials() {
 
   const { data, error } = await state.supabase
     .from("materials")
-    .select("id, title, content, meta, created_at")
+    .select("id, title, content, meta, created_at, share_id")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -703,11 +785,38 @@ async function loadCloudMaterials() {
   state.materials = (data || []).map(normalizeMaterial);
 }
 
+async function loadSharedMaterialFromHash() {
+  if (!state.supabase || !location.hash.startsWith("#share=")) return;
+
+  const shareId = decodeURIComponent(location.hash.replace("#share=", ""));
+  const { data, error } = await state.supabase
+    .from("materials")
+    .select("id, title, content, meta, created_at, share_id")
+    .eq("share_id", shareId)
+    .single();
+
+  if (error || !data) {
+    showToast("Paylaşım bağlantısı bulunamadı.");
+    return;
+  }
+
+  const material = normalizeMaterial(data);
+  state.currentOutput = material.content;
+  state.currentMeta = material.meta;
+  state.currentMaterialId = material.id;
+  els.outputTitle.textContent = material.title;
+  renderOutput(material.content);
+  location.hash = "#studio";
+  syncView();
+  showToast("Paylaşılan materyal açıldı.");
+}
+
 function normalizeMaterial(row) {
   return {
     id: row.id,
     title: row.title,
     content: row.content,
+    shareId: row.share_id || null,
     meta: {
       ...(row.meta || {}),
       createdAt: row.meta?.createdAt || row.created_at || new Date().toISOString(),

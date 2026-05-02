@@ -500,6 +500,16 @@ textarea:focus {
   line-height: 1.65;
 }
 
+.output-editor {
+  width: 100%;
+  min-height: 520px;
+  border: 0;
+  border-radius: 0;
+  padding: 22px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  line-height: 1.55;
+}
+
 .markdown-output h3 {
   margin: 18px 0 8px;
   font-size: 1.08rem;
