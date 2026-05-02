@@ -158,7 +158,7 @@ async function handleAuth(event) {
   }
 
   const sessionResult = await state.supabase.auth.getSession();
-  state.user = result.data.session?.user || sessionResult.data.session?.user || result.data.user || state.user;
+  state.user = result.data.session?.user || sessionResult.data.session?.user || null;
   if (state.user) await loadCloudMaterials();
   renderAuth();
   renderLibrary();
