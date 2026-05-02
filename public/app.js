@@ -95,7 +95,7 @@ async function configureSupabase() {
     const response = await fetch("/api/config");
     const config = await response.json();
     if (!config.supabaseUrl || !config.supabaseAnonKey) {
-      setAuthStatus("Supabase ayari bekleniyor.");
+      setAuthStatus("Supabase ayarı bekleniyor.");
       return;
     }
 
@@ -121,7 +121,7 @@ async function configureSupabase() {
     renderAuth();
     renderLibrary();
   } catch {
-    setAuthStatus("Supabase baglantisi kurulamadi.");
+    setAuthStatus("Supabase bağlantısı kurulamadı.");
     renderAuth();
   }
 }
@@ -129,7 +129,7 @@ async function configureSupabase() {
 async function handleAuth(event) {
   event.preventDefault();
   if (!state.supabase) {
-    showToast("Supabase henuz hazir degil.");
+    showToast("Supabase henüz hazır değil.");
     return;
   }
 
@@ -137,7 +137,7 @@ async function handleAuth(event) {
   const email = els.authEmail.value.trim();
   const password = els.authPassword.value;
   if (!email || !password) {
-    showToast("E-posta ve sifre gerekli.");
+    showToast("E-posta ve şifre gerekli.");
     return;
   }
 
@@ -157,7 +157,7 @@ async function handleAuth(event) {
   if (state.user) await loadCloudMaterials();
   renderAuth();
   renderLibrary();
-  showToast(mode === "signup" ? "Kayit olusturuldu." : "Giris yapildi.");
+  showToast(mode === "signup" ? "Kayıt oluşturuldu." : "Giriş yapıldı.");
 }
 
 async function signOut() {
@@ -166,7 +166,7 @@ async function signOut() {
   state.materials = loadMaterials();
   renderAuth();
   renderLibrary();
-  showToast("Oturum kapatildi.");
+  showToast("Oturum kapatıldı.");
 }
 
 function renderAuth() {
@@ -177,7 +177,7 @@ function renderAuth() {
     setAuthStatus("");
     return;
   }
-  setAuthStatus(state.cloudReady ? "Giris yapinca materyaller hesaba kaydedilir." : "Supabase ayari bekleniyor.");
+  setAuthStatus(state.cloudReady ? "Giriş yapınca materyaller hesaba kaydedilir." : "Supabase ayarı bekleniyor.");
 }
 
 function setAuthStatus(message) {
@@ -189,7 +189,7 @@ async function generateMaterial(event) {
   const payload = readForm();
 
   if (!payload.topic) {
-    showToast("Once bir konu yaz.");
+    showToast("Önce bir konu yaz.");
     return;
   }
 
@@ -213,14 +213,14 @@ async function generateMaterial(event) {
     els.outputTitle.textContent = `${typeLabel(payload.type)}: ${payload.topic}`;
     renderOutput(data.content);
     await checkHealth();
-    showToast(data.source === "openai" ? "AI icerigi hazir." : "Demo icerik hazir.");
+    showToast(data.source === "openai" ? "AI içeriği hazır." : "Demo içerik hazır.");
   } catch (error) {
     const fallback = buildDemoMaterial(payload);
     state.currentOutput = fallback;
     state.currentMeta = { ...payload, source: "demo", createdAt: new Date().toISOString() };
     els.outputTitle.textContent = `${typeLabel(payload.type)}: ${payload.topic}`;
     renderOutput(fallback);
-    showToast(error.message || "Demo icerik olusturuldu.");
+    showToast(error.message || "Demo içerik oluşturuldu.");
   } finally {
     setLoading(false);
   }
@@ -239,8 +239,8 @@ function readForm() {
 
 function setLoading(isLoading) {
   els.generate.disabled = isLoading;
-  els.generate.textContent = isLoading ? "Uretiliyor..." : "Icerik uret";
-  els.modePill.textContent = isLoading ? "Calisiyor" : state.apiLive ? "AI aktif" : "Demo mod";
+  els.generate.textContent = isLoading ? "Üretiliyor..." : "İçerik üret";
+  els.modePill.textContent = isLoading ? "Çalışıyor" : state.apiLive ? "AI aktif" : "Demo mod";
 }
 
 function renderOutput(markdown) {
@@ -342,7 +342,7 @@ function inlineFormat(value) {
 
 async function saveOutput() {
   if (!state.currentOutput || !state.currentMeta) {
-    showToast("Kaydedilecek icerik yok.");
+    showToast("Kaydedilecek içerik yok.");
     return;
   }
 
@@ -379,21 +379,21 @@ async function saveOutput() {
   state.materials = [item, ...state.materials].slice(0, 80);
   saveMaterials();
   renderLibrary();
-  showToast("Materyal bu tarayiciya kaydedildi.");
+  showToast("Materyal bu tarayıcıya kaydedildi.");
 }
 
 async function copyOutput() {
   if (!state.currentOutput) {
-    showToast("Kopyalanacak icerik yok.");
+    showToast("Kopyalanacak içerik yok.");
     return;
   }
   await navigator.clipboard?.writeText(state.currentOutput);
-  showToast("Icerik panoya kopyalandi.");
+  showToast("İçerik panoya kopyalandı.");
 }
 
 function downloadOutput() {
   if (!state.currentOutput || !state.currentMeta) {
-    showToast("Indirilecek icerik yok.");
+    showToast("İndirilecek içerik yok.");
     return;
   }
   downloadText(slugify(state.currentMeta.topic) + ".md", state.currentOutput);
@@ -401,13 +401,13 @@ function downloadOutput() {
 
 function printOutput() {
   if (!state.currentOutput || !state.currentMeta) {
-    showToast("Yazdirilacak icerik yok.");
+    showToast("Yazdırılacak içerik yok.");
     return;
   }
 
   const printWindow = window.open("", "_blank", "width=900,height=700");
   if (!printWindow) {
-    showToast("Tarayici yazdirma penceresini engelledi.");
+    showToast("Tarayıcı yazdırma penceresini engelledi.");
     return;
   }
 
@@ -437,24 +437,24 @@ function clearStudio() {
   els.form.reset();
   state.currentOutput = "";
   state.currentMeta = null;
-  els.outputTitle.textContent = "Hazir icerik burada gorunur";
+  els.outputTitle.textContent = "Hazır içerik burada görünür";
   els.outputBox.innerHTML = `
     <div class="empty-state">
-      <strong>Bir konu yazip uretime basla.</strong>
-      <span>Ders plani, quiz, ozet veya kart seti olusturabilirsin.</span>
+      <strong>Bir konu yazıp üretime başla.</strong>
+      <span>Ders planı, quiz, özet veya kart seti oluşturabilirsin.</span>
     </div>
   `;
 }
 
 function fillExample() {
-  els.topic.value = "Yapay zeka okuryazarligi";
+  els.topic.value = "Yapay zeka okuryazarlığı";
   els.level.value = "Lise";
   els.type.value = "lesson";
   els.duration.value = "40 dakika";
-  els.tone.value = "Sade ve anlasilir";
-  els.goal.value = "Ogrenciler AI araclarini bilincli kullanmayi, kaynak kontrolunu ve etik riskleri tartissin.";
+  els.tone.value = "Sade ve anlaşılır";
+  els.goal.value = "Öğrenciler AI araçlarını bilinçli kullanmayı, kaynak kontrolünü ve etik riskleri tartışsın.";
   location.hash = "#studio";
-  showToast("Ornek konu dolduruldu.");
+  showToast("Örnek konu dolduruldu.");
 }
 
 function renderLibrary() {
@@ -470,8 +470,8 @@ function renderLibrary() {
   if (!visible.length) {
     els.libraryGrid.innerHTML = `
       <div class="empty-state">
-        <strong>Henuz kayitli materyal yok.</strong>
-        <span>Urettigin icerikleri kaydederek burada arsivleyebilirsin.</span>
+        <strong>Henüz kayıtlı materyal yok.</strong>
+        <span>Ürettiğin içerikleri kaydederek burada arşivleyebilirsin.</span>
       </div>
     `;
     return;
@@ -488,7 +488,7 @@ function libraryCardTemplate(item) {
   return `
     <article class="library-card">
       <strong title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</strong>
-      <span>${escapeHtml(summary || "Kayitli materyal")}</span>
+      <span>${escapeHtml(summary || "Kayıtlı materyal")}</span>
       <small>${escapeHtml(item.meta.level)} · ${escapeHtml(date)} · ${escapeHtml(item.meta.source)}</small>
       <div class="card-actions">
         <button class="secondary-button" type="button" data-library-action="open" data-id="${item.id}">Ac</button>
@@ -548,7 +548,7 @@ function syncView() {
 
 function exportLibrary() {
   if (!state.materials.length) {
-    showToast("Disa aktarilacak materyal yok.");
+    showToast("Dışa aktarılacak materyal yok.");
     return;
   }
   const content = state.materials
@@ -563,120 +563,120 @@ function buildDemoMaterial(payload) {
     return `# ${title}
 
 ## Hedef
-${payload.level} seviyesi icin ${payload.topic} konusunu olcmek ve eksik kavramlari hizlica gormek.
+${payload.level} seviyesi için ${payload.topic} konusunu ölçmek ve eksik kavramları hızlıca görmek.
 
 ## Sorular
-1. ${payload.topic} konusunun temel amaci nedir?
-2. Bu konuyla ilgili gunluk hayattan bir ornek ver.
-3. Asagidaki ifadeyi acikla: "${payload.topic} sadece bilgi degil, uygulama gerektirir."
-4. Bir yanlis anlama yaz ve dogrusunu belirt.
-5. Konuyu 3 maddede ozetle.
+1. ${payload.topic} konusunun temel amacı nedir?
+2. Bu konuyla ilgili günlük hayattan bir örnek ver.
+3. Aşağıdaki ifadeyi açıkla: "${payload.topic} sadece bilgi değil, uygulama gerektirir."
+4. Bir yanlış anlama yaz ve doğrusunu belirt.
+5. Konuyu 3 maddede özetle.
 
 ## Cevap anahtari
-- Cevaplar kavram dogrulugu, ornek kalitesi ve acik ifade uzerinden degerlendirilir.
-- Her soru 20 puandir.
-- Kisa geri bildirim: Guclu kavramlari koru, zayif kalan kavramlar icin tekrar etkinligi yap.`;
+- Cevaplar kavram doğruluğu, örnek kalitesi ve açık ifade üzerinden değerlendirilir.
+- Her soru 20 puandır.
+- Kısa geri bildirim: Güçlü kavramları koru, zayıf kalan kavramlar için tekrar etkinliği yap.`;
   }
 
   if (payload.type === "flashcards") {
     return `# ${title}
 
 ## Kart seti
-- **Kart 1:** ${payload.topic} nedir? / Temel kavrami tek cumlede acikla.
-- **Kart 2:** En onemli 3 anahtar kelime nedir? / Kavram, ornek, uygulama.
-- **Kart 3:** Nerede kullanilir? / Gercek yasamdan bir durumla bagla.
-- **Kart 4:** Sik hata nedir? / Ezberlemek ama iliski kurmamak.
-- **Kart 5:** Mini gorev nedir? / Konuyu 90 saniyelik bir anlatima donustur.
+- **Kart 1:** ${payload.topic} nedir? / Temel kavramı tek cümlede açıkla.
+- **Kart 2:** En önemli 3 anahtar kelime nedir? / Kavram, örnek, uygulama.
+- **Kart 3:** Nerede kullanılır? / Gerçek yaşamdan bir durumla bağla.
+- **Kart 4:** Sık hata nedir? / Ezberlemek ama ilişki kurmamak.
+- **Kart 5:** Mini görev nedir? / Konuyu 90 saniyelik bir anlatıma dönüştür.
 
-## Tekrar onerisi
-Ilk tekrar dersten hemen sonra, ikinci tekrar 24 saat sonra, ucuncu tekrar hafta sonunda yapilir.`;
+## Tekrar önerisi
+İlk tekrar dersten hemen sonra, ikinci tekrar 24 saat sonra, üçüncü tekrar hafta sonunda yapılır.`;
   }
 
   if (payload.type === "summary") {
     return `# ${title}
 
-## Kisa ozet
-${payload.topic}, ${payload.level} duzeyinde once temel kavramlar, sonra ornekler ve en son uygulama uzerinden islenmelidir.
+## Kısa özet
+${payload.topic}, ${payload.level} düzeyinde önce temel kavramlar, sonra örnekler ve en son uygulama üzerinden işlenmelidir.
 
 ## Ana fikirler
-- Konuyu tek bir buyuk soru etrafinda toparla.
-- Ogrenciden sadece tanim degil, ornek ve karsilastirma iste.
+- Konuyu tek bir büyük soru etrafında toparla.
+- Öğrenciden sadece tanım değil, örnek ve karşılaştırma iste.
 - ${payload.tone} anlatim kullan.
-- ${payload.duration} icinde bir giris, bir etkinlik ve bir cikis bileti planla.
+- ${payload.duration} içinde bir giriş, bir etkinlik ve bir çıkış bileti planla.
 
-## Cikis bileti
-Ogrenciler dersten cikmadan once "${payload.topic} konusunda bugun ogrendigim en net fikir..." cumlesini tamamlar.`;
+## Çıkış bileti
+Öğrenciler dersten çıkmadan önce "${payload.topic} konusunda bugün öğrendiğim en net fikir..." cümlesini tamamlar.`;
   }
 
   if (payload.type === "assignment") {
     return `# ${title}
 
-## Odev amaci
-${payload.level} seviyesi icin ${payload.topic} konusunu arastirma, uygulama ve kisa sunumla pekistirmek.
+## Ödev amacı
+${payload.level} seviyesi için ${payload.topic} konusunu araştırma, uygulama ve kısa sunumla pekiştirmek.
 
 ## Yonetge
 1. Konuyu 5 temel kavramla acikla.
 2. Gercek hayattan bir ornek bul.
-3. Ornegi ders kavramlariyla iliskilendir.
-4. 1 sayfalik kisa rapor veya 5 slaytlik sunum hazirla.
+3. Örneği ders kavramlarıyla ilişkilendir.
+4. 1 sayfalık kısa rapor veya 5 slaytlık sunum hazırla.
 
 ## Teslim kriterleri
-- Acik ve duzenli anlatim
+- Açık ve düzenli anlatım
 - Kaynak belirtme
-- Ozgun ornek kullanma
-- Zamaninda teslim
+- Özgün örnek kullanma
+- Zamanında teslim
 
 ## Ek not
-${payload.goal || "Odev bireysel yapilir; isteyen ogrenciler ek bir soru-cevap bolumu ekleyebilir."}`;
+${payload.goal || "Ödev bireysel yapılır; isteyen öğrenciler ek bir soru-cevap bölümü ekleyebilir."}`;
   }
 
   if (payload.type === "rubric") {
     return `# ${title}
 
-## Degerlendirme rubrigi
+## Değerlendirme rubriği
 
-| Kriter | 4 - Cok iyi | 3 - Iyi | 2 - Gelisiyor | 1 - Baslangic |
+| Kriter | 4 - Çok iyi | 3 - İyi | 2 - Gelişiyor | 1 - Başlangıç |
 | --- | --- | --- | --- | --- |
-| Kavram dogrulugu | Tum kavramlar dogru | Kucuk eksikler var | Bazi kavramlar karisik | Temel kavramlar eksik |
-| Ornek kullanimi | Ozgun ve yerinde | Uygun ama sinirli | Kismen baglantili | Ornek yok veya ilgisiz |
-| Aciklik | Cok net ve duzenli | Anlasilir | Yer yer belirsiz | Takibi zor |
-| Uygulama | Bilgiyi yeni duruma aktarir | Basit uygulama yapar | Yardimla uygular | Uygulama yapamaz |
+| Kavram doğruluğu | Tüm kavramlar doğru | Küçük eksikler var | Bazı kavramlar karışık | Temel kavramlar eksik |
+| Örnek kullanımı | Özgün ve yerinde | Uygun ama sınırlı | Kısmen bağlantılı | Örnek yok veya ilgisiz |
+| Açıklık | Çok net ve düzenli | Anlaşılır | Yer yer belirsiz | Takibi zor |
+| Uygulama | Bilgiyi yeni duruma aktarır | Basit uygulama yapar | Yardımla uygular | Uygulama yapamaz |
 
 ## Geri bildirim cumlesi
-${payload.topic} konusunda en guclu yanin ..., bir sonraki adimda ... uzerinde calismalisin.`;
+${payload.topic} konusunda en güçlü yanın ..., bir sonraki adımda ... üzerinde çalışmalısın.`;
   }
 
   return `# ${title}
 
 ## Ders hedefi
-${payload.level} ogrencileri ${payload.topic} konusunu kavrar, orneklerle aciklar ve kisa bir uygulama uretir.
+${payload.level} öğrencileri ${payload.topic} konusunu kavrar, örneklerle açıklar ve kısa bir uygulama üretir.
 
 ## Akis
-1. **Giris - 5 dakika:** Merak uyandiran bir soru sor.
-2. **Kavram anlatimi - 10 dakika:** Konuyu ${payload.tone.toLocaleLowerCase("tr-TR")} bir dille acikla.
-3. **Etkinlik - 15 dakika:** Ogrenciler ikili gruplarla bir ornek olusturur.
-4. **Degerlendirme - 5 dakika:** 3 soruluk hizli kontrol yap.
-5. **Kapanis - 5 dakika:** Ogrenciler tek cumlelik ozet yazar.
+1. **Giriş - 5 dakika:** Merak uyandıran bir soru sor.
+2. **Kavram anlatımı - 10 dakika:** Konuyu ${payload.tone.toLocaleLowerCase("tr-TR")} bir dille açıkla.
+3. **Etkinlik - 15 dakika:** Öğrenciler ikili gruplarla bir örnek oluşturur.
+4. **Değerlendirme - 5 dakika:** 3 soruluk hızlı kontrol yap.
+5. **Kapanış - 5 dakika:** Öğrenciler tek cümlelik özet yazar.
 
 ## Notlar
-${payload.goal || "Bu plan ilk taslaktir; sinif seviyesine gore ornekler ve sureler kolayca degistirilebilir."}
+${payload.goal || "Bu plan ilk taslaktır; sınıf seviyesine göre örnekler ve süreler kolayca değiştirilebilir."}
 
 ## Olcme
-- Kavram dogrulugu
-- Ornek kalitesi
-- Kisa ve net ifade
-- Derse katilim`;
+- Kavram doğruluğu
+- Örnek kalitesi
+- Kısa ve net ifade
+- Derse katılım`;
 }
 
 function typeLabel(type) {
   return {
-    lesson: "Ders plani",
+    lesson: "Ders planı",
     quiz: "Quiz",
-    summary: "Konu ozeti",
+    summary: "Konu özeti",
     flashcards: "Kartlar",
-    assignment: "Odev",
+    assignment: "Ödev",
     rubric: "Rubrik",
-  }[type] || "Icerik";
+  }[type] || "İçerik";
 }
 
 function loadMaterials() {
@@ -747,10 +747,10 @@ function escapeHtml(value) {
 
 function translateAuthError(message) {
   const lower = message.toLocaleLowerCase("tr-TR");
-  if (lower.includes("invalid login credentials")) return "E-posta veya sifre hatali.";
-  if (lower.includes("email not confirmed")) return "E-posta dogrulamasi gerekiyor.";
-  if (lower.includes("user already registered")) return "Bu e-posta zaten kayitli.";
-  if (lower.includes("password")) return "Sifre en az 6 karakter olmali.";
+  if (lower.includes("invalid login credentials")) return "E-posta veya şifre hatalı.";
+  if (lower.includes("email not confirmed")) return "E-posta doğrulaması gerekiyor.";
+  if (lower.includes("user already registered")) return "Bu e-posta zaten kayıtlı.";
+  if (lower.includes("password")) return "Şifre en az 6 karakter olmalı.";
   return message;
 }
 

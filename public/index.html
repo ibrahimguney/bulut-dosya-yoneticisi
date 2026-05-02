@@ -3,17 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AkilLab | AI Egitim Paneli</title>
+    <title>AkilLab | AI Eğitim Paneli</title>
     <meta
       name="description"
-      content="AI destekli ders plani, quiz, ozet ve calisma materyali ureten egitim paneli."
+      content="AI destekli ders planı, quiz, özet ve çalışma materyali üreten eğitim paneli."
     />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar" aria-label="Uygulama menusu">
+      <aside class="sidebar" aria-label="Uygulama menüsü">
         <a class="brand" href="#studio" aria-label="AkilLab ana ekran">
           <span class="brand-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" role="img">
@@ -22,22 +22,22 @@
           </span>
           <span>
             <strong>AkilLab</strong>
-            <small>AI egitim paneli</small>
+            <small>AI eğitim paneli</small>
           </span>
         </a>
 
         <nav class="nav-list">
           <a class="nav-item active" href="#studio" data-view-link="studio">
-            <span aria-hidden="true">✦</span>
-            <span>Uretim studyosu</span>
+            <span aria-hidden="true">*</span>
+            <span>Üretim stüdyosu</span>
           </a>
           <a class="nav-item" href="#library" data-view-link="library">
-            <span aria-hidden="true">▤</span>
-            <span>Materyal kutuphanesi</span>
+            <span aria-hidden="true">[]</span>
+            <span>Materyal kütüphanesi</span>
           </a>
           <a class="nav-item" href="#roadmap" data-view-link="roadmap">
-            <span aria-hidden="true">✓</span>
-            <span>Gelistirme plani</span>
+            <span aria-hidden="true">OK</span>
+            <span>Geliştirme planı</span>
           </a>
         </nav>
 
@@ -45,60 +45,60 @@
           <form id="authForm" class="auth-form">
             <div>
               <strong>Hesap</strong>
-              <p id="authStatus">Supabase baglantisi hazirlaniyor.</p>
+              <p id="authStatus">Supabase bağlantısı hazırlanıyor.</p>
             </div>
             <label>
               E-posta
               <input id="authEmail" type="email" autocomplete="email" placeholder="ornek@email.com" />
             </label>
             <label>
-              Sifre
+              Şifre
               <input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="En az 6 karakter" />
             </label>
             <div class="auth-actions">
-              <button class="secondary-button" type="submit" data-auth-mode="signin">Giris</button>
-              <button class="secondary-button" type="submit" data-auth-mode="signup">Kayit</button>
+              <button class="secondary-button" type="submit" data-auth-mode="signin">Giriş</button>
+              <button class="secondary-button" type="submit" data-auth-mode="signup">Kayıt</button>
             </div>
           </form>
           <div class="account-card" id="accountCard" hidden>
-            <span>Oturum acik</span>
+            <span>Oturum açık</span>
             <strong id="accountEmail"></strong>
-            <button class="secondary-button" id="signOutButton" type="button">Cikis yap</button>
+            <button class="secondary-button" id="signOutButton" type="button">Çıkış yap</button>
           </div>
         </section>
 
-        <section class="status-panel" aria-label="Yayin durumu">
+        <section class="status-panel" aria-label="Yayın durumu">
           <div>
             <span class="status-dot" id="statusDot"></span>
             <strong id="statusTitle">Demo mod</strong>
           </div>
-          <p id="statusCopy">API anahtari eklenince ayni panel gercek AI ile calisir.</p>
+          <p id="statusCopy">API anahtarı eklenince aynı panel gerçek AI ile çalışır.</p>
         </section>
       </aside>
 
       <main class="workspace">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Surekli yayinda gelistirilebilir panel</p>
-            <h1>AI ile ders icerigi, quiz ve calisma materyali uret.</h1>
+            <p class="eyebrow">Sürekli yayında geliştirilebilir panel</p>
+            <h1>AI ile ders içeriği, quiz ve çalışma materyali üret.</h1>
           </div>
           <div class="top-actions">
-            <button class="secondary-button" id="seedButton" type="button">Ornek doldur</button>
-            <a class="primary-button" href="#studio">Yeni icerik</a>
+            <button class="secondary-button" id="seedButton" type="button">Örnek doldur</button>
+            <a class="primary-button" href="#studio">Yeni içerik</a>
           </div>
         </header>
 
-        <section class="stats-grid" aria-label="Ozet">
+        <section class="stats-grid" aria-label="Özet">
           <article class="stat">
-            <span>Kayitli materyal</span>
+            <span>Kayıtlı materyal</span>
             <strong id="savedCount">0</strong>
           </article>
           <article class="stat">
-            <span>Uretim turu</span>
+            <span>Üretim türü</span>
             <strong>6</strong>
           </article>
           <article class="stat">
-            <span>Yayin modeli</span>
+            <span>Yayın modeli</span>
             <strong>Render</strong>
           </article>
         </section>
@@ -108,15 +108,15 @@
             <form class="generator-panel" id="generatorForm">
               <div class="section-title">
                 <div>
-                  <p class="eyebrow">Uretim studyosu</p>
-                  <h2>Yeni egitim materyali</h2>
+                  <p class="eyebrow">Üretim stüdyosu</p>
+                  <h2>Yeni eğitim materyali</h2>
                 </div>
-                <span class="mode-pill" id="modePill">Hazir</span>
+                <span class="mode-pill" id="modePill">Hazır</span>
               </div>
 
               <label>
                 Konu
-                <input id="topicInput" name="topic" type="text" placeholder="Orn. Fotosentez, Osmanli'da Islahatlar" required />
+                <input id="topicInput" name="topic" type="text" placeholder="Örn. Fotosentez, Osmanlı'da Islahatlar" required />
               </label>
 
               <div class="form-row">
@@ -125,18 +125,18 @@
                   <select id="levelSelect" name="level">
                     <option>Ortaokul</option>
                     <option>Lise</option>
-                    <option>Universite</option>
-                    <option>Yetiskin egitimi</option>
+                    <option>Üniversite</option>
+                    <option>Yetişkin eğitimi</option>
                   </select>
                 </label>
                 <label>
-                  Materyal turu
+                  Materyal türü
                   <select id="typeSelect" name="type">
-                    <option value="lesson">Ders plani</option>
+                    <option value="lesson">Ders planı</option>
                     <option value="quiz">Quiz</option>
-                    <option value="summary">Konu ozeti</option>
+                    <option value="summary">Konu özeti</option>
                     <option value="flashcards">Kartlar</option>
-                    <option value="assignment">Odev</option>
+                    <option value="assignment">Ödev</option>
                     <option value="rubric">Rubrik</option>
                   </select>
                 </label>
@@ -144,21 +144,21 @@
 
               <div class="form-row">
                 <label>
-                  Sure
+                  Süre
                   <select id="durationSelect" name="duration">
                     <option>20 dakika</option>
                     <option>40 dakika</option>
                     <option>60 dakika</option>
-                    <option>Haftalik plan</option>
+                    <option>Haftalık plan</option>
                   </select>
                 </label>
                 <label>
                   Ton
                   <select id="toneSelect" name="tone">
-                    <option>Sade ve anlasilir</option>
+                    <option>Sade ve anlaşılır</option>
                     <option>Akademik</option>
-                    <option>Oyunlastirilmis</option>
-                    <option>Sinav odakli</option>
+                    <option>Oyunlaştırılmış</option>
+                    <option>Sınav odaklı</option>
                   </select>
                 </label>
               </div>
@@ -169,33 +169,33 @@
                   id="goalInput"
                   name="goal"
                   rows="5"
-                  placeholder="Orn. 8. sinif ogrencileri icin, 5 soruluk mini quiz ve kisa tekrar etkinligi olsun."
+                  placeholder="Örn. 8. sınıf öğrencileri için, 5 soruluk mini quiz ve kısa tekrar etkinliği olsun."
                 ></textarea>
               </label>
 
               <div class="generator-actions">
-                <button class="primary-button" id="generateButton" type="submit">Icerik uret</button>
+                <button class="primary-button" id="generateButton" type="submit">İçerik üret</button>
                 <button class="secondary-button" id="clearButton" type="button">Temizle</button>
               </div>
             </form>
 
-            <section class="output-panel" aria-label="Uretilen icerik">
+            <section class="output-panel" aria-label="Üretilen içerik">
               <div class="section-title">
                 <div>
-                  <p class="eyebrow">Cikti</p>
-                  <h2 id="outputTitle">Hazir icerik burada gorunur</h2>
+                  <p class="eyebrow">Çıktı</p>
+                  <h2 id="outputTitle">Hazır içerik burada görünür</h2>
                 </div>
                 <div class="output-actions">
                   <button class="icon-button" id="copyButton" type="button" title="Kopyala" aria-label="Kopyala">CP</button>
                   <button class="icon-button" id="downloadButton" type="button" title="Markdown indir" aria-label="Markdown indir">DL</button>
-                  <button class="icon-button" id="printButton" type="button" title="Yazdir" aria-label="Yazdir">PR</button>
+                  <button class="icon-button" id="printButton" type="button" title="Yazdır" aria-label="Yazdır">PR</button>
                   <button class="icon-button" id="saveButton" type="button" title="Kaydet" aria-label="Kaydet">+</button>
                 </div>
               </div>
               <div class="output-box" id="outputBox">
                 <div class="empty-state">
-                  <strong>Bir konu yazip uretime basla.</strong>
-                  <span>Ders plani, quiz, ozet veya kart seti olusturabilirsin.</span>
+                  <strong>Bir konu yazıp üretime başla.</strong>
+                  <span>Ders planı, quiz, özet veya kart seti oluşturabilirsin.</span>
                 </div>
               </div>
             </section>
@@ -205,21 +205,21 @@
         <section class="view-panel" id="libraryView">
           <div class="section-title library-head">
             <div>
-              <p class="eyebrow">Kutuphanem</p>
-              <h2>Kayitli materyaller</h2>
+              <p class="eyebrow">Kütüphanem</p>
+              <h2>Kayıtlı materyaller</h2>
             </div>
             <div class="library-tools">
               <input id="librarySearch" type="search" placeholder="Materyal ara" />
-              <select id="libraryTypeFilter" aria-label="Materyal turu filtrele">
-                <option value="all">Tum turler</option>
-                <option value="lesson">Ders plani</option>
+              <select id="libraryTypeFilter" aria-label="Materyal türü filtrele">
+                <option value="all">Tüm türler</option>
+                <option value="lesson">Ders planı</option>
                 <option value="quiz">Quiz</option>
-                <option value="summary">Konu ozeti</option>
+                <option value="summary">Konu özeti</option>
                 <option value="flashcards">Kartlar</option>
-                <option value="assignment">Odev</option>
+                <option value="assignment">Ödev</option>
                 <option value="rubric">Rubrik</option>
               </select>
-              <button class="secondary-button" id="exportLibraryButton" type="button">Disa aktar</button>
+              <button class="secondary-button" id="exportLibraryButton" type="button">Dışa aktar</button>
             </div>
           </div>
           <div class="library-grid" id="libraryGrid"></div>
@@ -228,41 +228,41 @@
         <section class="view-panel" id="roadmapView">
           <div class="roadmap-layout">
             <section class="roadmap-panel">
-              <p class="eyebrow">Yayin ve buyume</p>
-              <h2>Bu paneli nasil gelistiririz?</h2>
+              <p class="eyebrow">Yayın ve büyüme</p>
+              <h2>Bu paneli nasıl geliştiririz?</h2>
               <div class="roadmap-list">
                 <article>
                   <span>1</span>
                   <div>
-                    <strong>Render yayini</strong>
-                    <p>Node Web Service olarak surekli acik kalir. Statik dosyalar ve API ayni servisten calisir.</p>
+                    <strong>Render yayını</strong>
+                    <p>Node Web Service olarak sürekli açık kalır. Statik dosyalar ve API aynı servisten çalışır.</p>
                   </div>
                 </article>
                 <article>
                   <span>2</span>
                   <div>
-                    <strong>Gercek AI baglantisi</strong>
-                    <p>Render Environment bolumune `OPENAI_API_KEY` eklenince `/api/generate` gercek modelden yanit alir.</p>
+                    <strong>Gerçek AI bağlantısı</strong>
+                    <p>Render Environment bölümüne `OPENAI_API_KEY` eklenince `/api/generate` gerçek modelden yanıt alır.</p>
                   </div>
                 </article>
                 <article>
                   <span>3</span>
                   <div>
-                    <strong>Veritabani ve hesaplar</strong>
-                    <p>Supabase ile ogretmen hesaplari ve materyal arsivi aktiflestirildi; sonraki adim siniflar ve paylasim linkleri.</p>
+                    <strong>Veritabanı ve hesaplar</strong>
+                    <p>Supabase ile öğretmen hesapları ve materyal arşivi aktifleştirildi; sonraki adım sınıflar ve paylaşım linkleri.</p>
                   </div>
                 </article>
                 <article>
                   <span>4</span>
                   <div>
-                    <strong>Urunlesme</strong>
-                    <p>PDF cikti, ogrenci modulu, seviye analizi ve kurum paneliyle ticari urune donusebilir.</p>
+                    <strong>Ürünleşme</strong>
+                    <p>PDF çıktı, öğrenci modülü, seviye analizi ve kurum paneliyle ticari ürüne dönüşebilir.</p>
                   </div>
                 </article>
               </div>
             </section>
             <aside class="deploy-card">
-              <span>Render ayari</span>
+              <span>Render ayarı</span>
               <code>Build Command: npm install</code>
               <code>Start Command: npm start</code>
               <code>Environment: OPENAI_API_KEY</code>
