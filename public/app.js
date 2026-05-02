@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+﻿import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const STORAGE_KEY = "akillab-materials";
 
@@ -606,7 +606,7 @@ async function shareMaterial(item) {
   if (item.shareId) {
     const url = `${location.origin}${location.pathname}#share=${encodeURIComponent(item.shareId)}`;
     await navigator.clipboard?.writeText(url);
-    showToast("Mevcut paylaşım linki panoya kopyalandı.");
+    showToast(`Paylaşım linki kopyalandı: ${url}`);
     return;
   }
 
@@ -627,7 +627,7 @@ async function shareMaterial(item) {
   const url = `${location.origin}${location.pathname}#share=${encodeURIComponent(updated.shareId)}`;
   await navigator.clipboard?.writeText(url);
   renderLibrary();
-  showToast("Paylaşım linki panoya kopyalandı.");
+  showToast(`Paylaşım linki kopyalandı: ${url}`);
 }
 
 function syncView() {
@@ -880,3 +880,4 @@ function showToast(message) {
   window.clearTimeout(showToast.timer);
   showToast.timer = window.setTimeout(() => els.toast.classList.remove("visible"), 2600);
 }
+
