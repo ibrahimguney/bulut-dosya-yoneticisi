@@ -3,206 +3,248 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bulut Alanı | Dosya Yönetimi</title>
+    <title>AkilLab | AI Egitim Paneli</title>
+    <meta
+      name="description"
+      content="AI destekli ders plani, quiz, ozet ve calisma materyali ureten egitim paneli."
+    />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="brand-mark" aria-hidden="true">
+      <aside class="sidebar" aria-label="Uygulama menusu">
+        <a class="brand" href="#studio" aria-label="AkilLab ana ekran">
+          <span class="brand-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" role="img">
-              <path d="M7.2 18.5h10.2a4.1 4.1 0 0 0 .7-8.2 6.2 6.2 0 0 0-11.8-1.8 5 5 0 0 0 .9 10Z" />
+              <path d="M12 2.4 20.7 7v9.9L12 21.6 3.3 16.9V7L12 2.4Zm0 3.2L6.2 8.7v6.4l5.8 3.1 5.8-3.1V8.7L12 5.6Zm0 3.1a3.3 3.3 0 1 1 0 6.6 3.3 3.3 0 0 1 0-6.6Z" />
             </svg>
-          </div>
-          <div>
-            <strong>Bulut Alanı</strong>
-            <span>Dosya operasyonları</span>
-          </div>
-        </div>
+          </span>
+          <span>
+            <strong>AkilLab</strong>
+            <small>AI egitim paneli</small>
+          </span>
+        </a>
 
-        <nav class="nav-list" aria-label="Klasörler">
-          <button class="nav-item active" data-folder="all" type="button">
-            <span class="nav-icon">⌂</span>
-            <span>Tüm dosyalar</span>
-          </button>
-          <button class="nav-item" data-folder="documents" type="button">
-            <span class="nav-icon">□</span>
-            <span>Belgeler</span>
-          </button>
-          <button class="nav-item" data-folder="images" type="button">
-            <span class="nav-icon">◧</span>
-            <span>Görseller</span>
-          </button>
-          <button class="nav-item" data-folder="shared" type="button">
-            <span class="nav-icon">↗</span>
-            <span>Paylaşılanlar</span>
-          </button>
+        <nav class="nav-list">
+          <a class="nav-item active" href="#studio" data-view-link="studio">
+            <span aria-hidden="true">✦</span>
+            <span>Uretim studyosu</span>
+          </a>
+          <a class="nav-item" href="#library" data-view-link="library">
+            <span aria-hidden="true">▤</span>
+            <span>Materyal kutuphanesi</span>
+          </a>
+          <a class="nav-item" href="#roadmap" data-view-link="roadmap">
+            <span aria-hidden="true">✓</span>
+            <span>Gelistirme plani</span>
+          </a>
         </nav>
 
-        <div class="storage-panel">
-          <div class="storage-head">
-            <span>Depolama</span>
-            <strong id="storagePercent">0%</strong>
+        <section class="status-panel" aria-label="Yayin durumu">
+          <div>
+            <span class="status-dot" id="statusDot"></span>
+            <strong id="statusTitle">Demo mod</strong>
           </div>
-          <div class="meter" aria-hidden="true">
-            <span id="storageMeter"></span>
-          </div>
-          <p id="storageText">0 MB / 100 MB</p>
-        </div>
+          <p id="statusCopy">API anahtari eklenince ayni panel gercek AI ile calisir.</p>
+        </section>
       </aside>
 
       <main class="workspace">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Çalışma alanı</p>
-            <h1>Bulut Dosya Yöneticisi</h1>
+            <p class="eyebrow">Surekli yayinda gelistirilebilir panel</p>
+            <h1>AI ile ders icerigi, quiz ve calisma materyali uret.</h1>
           </div>
-          <div class="account">
-            <span id="accountName">Oturum kapalı</span>
-            <button class="icon-button" id="signOutButton" type="button" title="Oturumu kapat" aria-label="Oturumu kapat">⏻</button>
+          <div class="top-actions">
+            <button class="secondary-button" id="seedButton" type="button">Ornek doldur</button>
+            <a class="primary-button" href="#studio">Yeni icerik</a>
           </div>
         </header>
 
-        <section class="auth-view" id="authView" hidden>
-          <div class="auth-layout">
-            <div class="auth-hero">
-              <p class="eyebrow">Bulut Alanı</p>
-              <h2>Dosyalar için sade ve güvenli çalışma alanı</h2>
-              <div class="auth-preview" aria-hidden="true">
-                <div class="preview-row">
-                  <span>PDF</span>
-                  <strong>Teklif-dosyasi.pdf</strong>
-                </div>
-                <div class="preview-row">
-                  <span>IMG</span>
-                  <strong>Urun-gorseli.png</strong>
-                </div>
-                <div class="preview-row muted">
-                  <span>↗</span>
-                  <strong>Paylaşım linki hazır</strong>
-                </div>
-              </div>
-            </div>
+        <section class="stats-grid" aria-label="Ozet">
+          <article class="stat">
+            <span>Kayitli materyal</span>
+            <strong id="savedCount">0</strong>
+          </article>
+          <article class="stat">
+            <span>Uretim turu</span>
+            <strong>6</strong>
+          </article>
+          <article class="stat">
+            <span>Yayin modeli</span>
+            <strong>Render</strong>
+          </article>
+        </section>
 
-            <form class="auth-panel" id="authForm">
-              <div>
-                <p class="eyebrow">Güvenli erişim</p>
-                <h2>Hesabına giriş yap</h2>
+        <section class="view-panel active" id="studioView">
+          <div class="studio-grid">
+            <form class="generator-panel" id="generatorForm">
+              <div class="section-title">
+                <div>
+                  <p class="eyebrow">Uretim studyosu</p>
+                  <h2>Yeni egitim materyali</h2>
+                </div>
+                <span class="mode-pill" id="modePill">Hazir</span>
               </div>
+
               <label>
-                E-posta
-                <input id="emailInput" type="email" autocomplete="email" placeholder="ornek@email.com" required />
+                Konu
+                <input id="topicInput" name="topic" type="text" placeholder="Orn. Fotosentez, Osmanli'da Islahatlar" required />
               </label>
-              <label>
-                Şifre
-                <input id="passwordInput" type="password" autocomplete="current-password" minlength="6" placeholder="En az 6 karakter" required />
-              </label>
-              <p class="auth-message" id="authMessage" role="status" aria-live="polite"></p>
-              <div class="auth-actions">
-                <button class="primary-button" type="submit" data-auth-mode="signin">Giriş yap</button>
-                <button class="secondary-button" type="submit" data-auth-mode="signup">Kayıt ol</button>
+
+              <div class="form-row">
+                <label>
+                  Seviye
+                  <select id="levelSelect" name="level">
+                    <option>Ortaokul</option>
+                    <option>Lise</option>
+                    <option>Universite</option>
+                    <option>Yetiskin egitimi</option>
+                  </select>
+                </label>
+                <label>
+                  Materyal turu
+                  <select id="typeSelect" name="type">
+                    <option value="lesson">Ders plani</option>
+                    <option value="quiz">Quiz</option>
+                    <option value="summary">Konu ozeti</option>
+                    <option value="flashcards">Kartlar</option>
+                    <option value="assignment">Odev</option>
+                    <option value="rubric">Rubrik</option>
+                  </select>
+                </label>
               </div>
-              <button class="ghost-button" id="demoButton" type="button">Demo olarak incele</button>
+
+              <div class="form-row">
+                <label>
+                  Sure
+                  <select id="durationSelect" name="duration">
+                    <option>20 dakika</option>
+                    <option>40 dakika</option>
+                    <option>60 dakika</option>
+                    <option>Haftalik plan</option>
+                  </select>
+                </label>
+                <label>
+                  Ton
+                  <select id="toneSelect" name="tone">
+                    <option>Sade ve anlasilir</option>
+                    <option>Akademik</option>
+                    <option>Oyunlastirilmis</option>
+                    <option>Sinav odakli</option>
+                  </select>
+                </label>
+              </div>
+
+              <label>
+                Hedef veya notlar
+                <textarea
+                  id="goalInput"
+                  name="goal"
+                  rows="5"
+                  placeholder="Orn. 8. sinif ogrencileri icin, 5 soruluk mini quiz ve kisa tekrar etkinligi olsun."
+                ></textarea>
+              </label>
+
+              <div class="generator-actions">
+                <button class="primary-button" id="generateButton" type="submit">Icerik uret</button>
+                <button class="secondary-button" id="clearButton" type="button">Temizle</button>
+              </div>
             </form>
+
+            <section class="output-panel" aria-label="Uretilen icerik">
+              <div class="section-title">
+                <div>
+                  <p class="eyebrow">Cikti</p>
+                  <h2 id="outputTitle">Hazir icerik burada gorunur</h2>
+                </div>
+                <div class="output-actions">
+                  <button class="icon-button" id="copyButton" type="button" title="Kopyala" aria-label="Kopyala">CP</button>
+                  <button class="icon-button" id="downloadButton" type="button" title="Markdown indir" aria-label="Markdown indir">DL</button>
+                  <button class="icon-button" id="printButton" type="button" title="Yazdir" aria-label="Yazdir">PR</button>
+                  <button class="icon-button" id="saveButton" type="button" title="Kaydet" aria-label="Kaydet">+</button>
+                </div>
+              </div>
+              <div class="output-box" id="outputBox">
+                <div class="empty-state">
+                  <strong>Bir konu yazip uretime basla.</strong>
+                  <span>Ders plani, quiz, ozet veya kart seti olusturabilirsin.</span>
+                </div>
+              </div>
+            </section>
           </div>
         </section>
 
-        <section class="dashboard" id="dashboard">
-          <div class="command-bar">
-            <label class="search-box">
-              <span>⌕</span>
-              <input id="searchInput" type="search" placeholder="Dosya adıyla ara" />
-            </label>
-            <div class="view-toggle" aria-label="Görünüm">
-              <button class="active" data-view="grid" type="button" title="Kart görünümü" aria-label="Kart görünümü">▦</button>
-              <button data-view="list" type="button" title="Liste görünümü" aria-label="Liste görünümü">☰</button>
+        <section class="view-panel" id="libraryView">
+          <div class="section-title library-head">
+            <div>
+              <p class="eyebrow">Kutuphanem</p>
+              <h2>Kayitli materyaller</h2>
             </div>
-            <label class="select-control">
-              <span>Sırala</span>
-              <select id="sortSelect">
-                <option value="newest">En yeni</option>
-                <option value="name">Ada göre</option>
-                <option value="size">Boyuta göre</option>
+            <div class="library-tools">
+              <input id="librarySearch" type="search" placeholder="Materyal ara" />
+              <select id="libraryTypeFilter" aria-label="Materyal turu filtrele">
+                <option value="all">Tum turler</option>
+                <option value="lesson">Ders plani</option>
+                <option value="quiz">Quiz</option>
+                <option value="summary">Konu ozeti</option>
+                <option value="flashcards">Kartlar</option>
+                <option value="assignment">Odev</option>
+                <option value="rubric">Rubrik</option>
               </select>
-            </label>
-            <button class="icon-button" id="refreshButton" type="button" title="Yenile" aria-label="Yenile">↻</button>
-            <button class="secondary-button" id="newFolderButton" type="button">Yeni klasör</button>
-            <label class="primary-button upload-button">
-              Yükle
-              <input id="fileInput" type="file" multiple />
-            </label>
-          </div>
-
-          <div class="stats-grid">
-            <div class="stat">
-              <span>Dosyalar</span>
-              <strong id="fileCount">0</strong>
-            </div>
-            <div class="stat">
-              <span>Klasörler</span>
-              <strong id="folderCount">0</strong>
-            </div>
-            <div class="stat">
-              <span>Paylaşımlar</span>
-              <strong id="shareCount">0</strong>
+              <button class="secondary-button" id="exportLibraryButton" type="button">Disa aktar</button>
             </div>
           </div>
+          <div class="library-grid" id="libraryGrid"></div>
+        </section>
 
-          <div class="work-grid">
-            <section class="content-band">
-              <div class="section-title">
-                <div>
-                  <p class="eyebrow">Dosya listesi</p>
-                  <h2 id="currentFolderTitle">Tüm dosyalar</h2>
-                </div>
-                <div class="section-meta">
-                  <span id="resultCount">0 öğe</span>
-                  <span id="lastSyncText">Henüz güncellenmedi</span>
-                </div>
-              </div>
-              <div class="file-grid" id="fileGrid"></div>
-              <div class="empty-state" id="emptyState" hidden>
-                <strong>Bu alanda dosya yok</strong>
-                <span>Yükle düğmesiyle dosya ekleyebilir veya yeni klasör oluşturabilirsin.</span>
+        <section class="view-panel" id="roadmapView">
+          <div class="roadmap-layout">
+            <section class="roadmap-panel">
+              <p class="eyebrow">Yayin ve buyume</p>
+              <h2>Bu paneli nasil gelistiririz?</h2>
+              <div class="roadmap-list">
+                <article>
+                  <span>1</span>
+                  <div>
+                    <strong>Render yayini</strong>
+                    <p>Node Web Service olarak surekli acik kalir. Statik dosyalar ve API ayni servisten calisir.</p>
+                  </div>
+                </article>
+                <article>
+                  <span>2</span>
+                  <div>
+                    <strong>Gercek AI baglantisi</strong>
+                    <p>Render Environment bolumune `OPENAI_API_KEY` eklenince `/api/generate` gercek modelden yanit alir.</p>
+                  </div>
+                </article>
+                <article>
+                  <span>3</span>
+                  <div>
+                    <strong>Veritabani ve hesaplar</strong>
+                    <p>Supabase ile ogretmen hesaplari, siniflar, materyal arsivi ve paylasim linkleri eklenebilir.</p>
+                  </div>
+                </article>
+                <article>
+                  <span>4</span>
+                  <div>
+                    <strong>Urunlesme</strong>
+                    <p>PDF cikti, ogrenci modulu, seviye analizi ve kurum paneliyle ticari urune donusebilir.</p>
+                  </div>
+                </article>
               </div>
             </section>
-
-            <aside class="insights-panel" aria-label="Çalışma alanı özeti">
-              <div class="insight-card">
-                <span>Depolama durumu</span>
-                <strong id="storageHealthText">Boş alan hazır</strong>
-              </div>
-              <div class="insight-card">
-                <span>En büyük dosya</span>
-                <strong id="largestFileText">Henüz dosya yok</strong>
-              </div>
-              <div class="activity-card">
-                <div class="section-title compact">
-                  <h2>Son hareketler</h2>
-                </div>
-                <div class="activity-list" id="activityList"></div>
-              </div>
+            <aside class="deploy-card">
+              <span>Render ayari</span>
+              <code>Build Command: npm install</code>
+              <code>Start Command: npm start</code>
+              <code>Environment: OPENAI_API_KEY</code>
             </aside>
           </div>
         </section>
       </main>
     </div>
-
-    <dialog id="folderDialog">
-      <form method="dialog" class="dialog-body" id="folderForm">
-        <h2 id="folderDialogTitle">Yeni klasör</h2>
-        <label>
-          Klasör adı
-          <input id="folderNameInput" type="text" maxlength="32" required />
-        </label>
-        <div class="dialog-actions">
-          <button class="secondary-button" value="cancel" type="submit">Vazgeç</button>
-          <button class="primary-button" id="folderSubmitButton" value="save" type="submit">Oluştur</button>
-        </div>
-      </form>
-    </dialog>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script type="module" src="app.js"></script>

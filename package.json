@@ -1,6 +1,12 @@
 {
-  "name": "bulut-dosya-yoneticisi",
+  "name": "akillab-ai-egitim-paneli",
   "version": "0.1.0",
   "private": true,
-  "description": "Yerelde calisan bulut dosya yoneticisi prototipi."
+  "description": "Render uzerinde calisan AI destekli egitim icerigi paneli.",
+  "scripts": {
+    "start": "node tools/local-server.cjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }

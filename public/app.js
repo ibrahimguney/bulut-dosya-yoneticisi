@@ -1,804 +1,563 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const SUPABASE_URL = "https://gblyelnbskjsumxxdyct.supabase.co";
-const SUPABASE_KEY = "sb_publishable_7jm5f6_T8QaqwO4fAkhKnQ_7-woQ-fl";
-const BUCKET = "files";
-const QUOTA_BYTES = 100 * 1024 * 1024;
-const SHARED_FILES_KEY = "bulut-shared-files";
-const DEFAULT_FOLDERS = [
-  { id: "documents", name: "Belgeler", system: true },
-  { id: "images", name: "Görseller", system: true },
-  { id: "shared", name: "Paylaşılanlar", system: true },
-];
-const DEMO_FOLDERS = [{ id: "projects", name: "Projeler", system: false }];
-const DEMO_FILES = [
-  {
-    name: "Musteri-sunum-notlari.pdf",
-    type: "application/pdf",
-    size: 2.4 * 1024 * 1024,
-    folder: "documents",
-    shared: true,
-    ageHours: 2,
-  },
-  {
-    name: "Urun-gorseli.png",
-    type: "image/png",
-    size: 980 * 1024,
-    folder: "images",
-    shared: false,
-    ageHours: 7,
-  },
-  {
-    name: "Teklif-tablosu.xlsx",
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    size: 640 * 1024,
-    folder: "projects",
-    shared: false,
-    ageHours: 24,
-  },
-  {
-    name: "Kampanya-metni.docx",
-    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    size: 420 * 1024,
-    folder: "documents",
-    shared: true,
-    ageHours: 40,
-  },
-];
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-});
+const STORAGE_KEY = "akillab-materials";
 
 const state = {
-  user: null,
-  demoMode: false,
-  activeFolder: "all",
-  view: "grid",
-  sortBy: "newest",
-  isLoading: false,
-  lastSyncedAt: null,
-  files: [],
-  sharedFiles: loadSharedFiles(),
-  folders: [...DEFAULT_FOLDERS],
+  currentOutput: "",
+  currentMeta: null,
+  materials: loadMaterials(),
+  apiLive: false,
 };
 
 const els = {
-  authView: document.querySelector("#authView"),
-  authForm: document.querySelector("#authForm"),
-  authMessage: document.querySelector("#authMessage"),
-  emailInput: document.querySelector("#emailInput"),
-  passwordInput: document.querySelector("#passwordInput"),
-  demoButton: document.querySelector("#demoButton"),
-  dashboard: document.querySelector("#dashboard"),
-  accountName: document.querySelector("#accountName"),
-  signOutButton: document.querySelector("#signOutButton"),
-  searchInput: document.querySelector("#searchInput"),
-  sortSelect: document.querySelector("#sortSelect"),
-  refreshButton: document.querySelector("#refreshButton"),
-  fileInput: document.querySelector("#fileInput"),
-  fileGrid: document.querySelector("#fileGrid"),
-  emptyState: document.querySelector("#emptyState"),
-  resultCount: document.querySelector("#resultCount"),
-  lastSyncText: document.querySelector("#lastSyncText"),
-  currentFolderTitle: document.querySelector("#currentFolderTitle"),
-  fileCount: document.querySelector("#fileCount"),
-  folderCount: document.querySelector("#folderCount"),
-  shareCount: document.querySelector("#shareCount"),
-  storagePercent: document.querySelector("#storagePercent"),
-  storageMeter: document.querySelector("#storageMeter"),
-  storageText: document.querySelector("#storageText"),
-  storageHealthText: document.querySelector("#storageHealthText"),
-  largestFileText: document.querySelector("#largestFileText"),
-  activityList: document.querySelector("#activityList"),
-  newFolderButton: document.querySelector("#newFolderButton"),
-  folderDialog: document.querySelector("#folderDialog"),
-  folderDialogTitle: document.querySelector("#folderDialogTitle"),
-  folderForm: document.querySelector("#folderForm"),
-  folderNameInput: document.querySelector("#folderNameInput"),
-  folderSubmitButton: document.querySelector("#folderSubmitButton"),
+  form: document.querySelector("#generatorForm"),
+  topic: document.querySelector("#topicInput"),
+  level: document.querySelector("#levelSelect"),
+  type: document.querySelector("#typeSelect"),
+  duration: document.querySelector("#durationSelect"),
+  tone: document.querySelector("#toneSelect"),
+  goal: document.querySelector("#goalInput"),
+  generate: document.querySelector("#generateButton"),
+  clear: document.querySelector("#clearButton"),
+  seed: document.querySelector("#seedButton"),
+  outputTitle: document.querySelector("#outputTitle"),
+  outputBox: document.querySelector("#outputBox"),
+  copy: document.querySelector("#copyButton"),
+  download: document.querySelector("#downloadButton"),
+  print: document.querySelector("#printButton"),
+  save: document.querySelector("#saveButton"),
+  savedCount: document.querySelector("#savedCount"),
+  libraryGrid: document.querySelector("#libraryGrid"),
+  librarySearch: document.querySelector("#librarySearch"),
+  libraryTypeFilter: document.querySelector("#libraryTypeFilter"),
+  exportLibrary: document.querySelector("#exportLibraryButton"),
+  modePill: document.querySelector("#modePill"),
+  statusDot: document.querySelector("#statusDot"),
+  statusTitle: document.querySelector("#statusTitle"),
+  statusCopy: document.querySelector("#statusCopy"),
   toast: document.querySelector("#toast"),
 };
 
-document.addEventListener("click", handleDocumentClick);
-els.authForm.addEventListener("submit", handleAuthSubmit);
-els.demoButton.addEventListener("click", startDemo);
-els.signOutButton.addEventListener("click", signOut);
-els.searchInput.addEventListener("input", renderFiles);
-els.sortSelect.addEventListener("change", () => {
-  state.sortBy = els.sortSelect.value;
-  renderFiles();
-});
-els.refreshButton.addEventListener("click", refreshWorkspace);
-els.fileInput.addEventListener("change", handleFiles);
-els.newFolderButton.addEventListener("click", () => {
-  openFolderDialog();
-});
-els.folderForm.addEventListener("submit", handleFolderSave);
+document.addEventListener("click", handleNavigation);
+els.form.addEventListener("submit", generateMaterial);
+els.clear.addEventListener("click", clearStudio);
+els.seed.addEventListener("click", fillExample);
+els.copy.addEventListener("click", copyOutput);
+els.download.addEventListener("click", downloadOutput);
+els.print.addEventListener("click", printOutput);
+els.save.addEventListener("click", saveOutput);
+els.librarySearch.addEventListener("input", renderLibrary);
+els.libraryTypeFilter.addEventListener("change", renderLibrary);
+els.exportLibrary.addEventListener("click", exportLibrary);
+window.addEventListener("hashchange", syncView);
 
 init();
 
 async function init() {
-  const { data } = await supabase.auth.getSession();
-  state.user = data.session?.user || null;
-
-  supabase.auth.onAuthStateChange(async (_event, session) => {
-    state.user = session?.user || null;
-    if (state.user) {
-      state.demoMode = false;
-      await loadWorkspace();
-    }
-    render();
-  });
-
-  if (state.user) await loadWorkspace();
-  render();
+  syncView();
+  renderLibrary();
+  await checkHealth();
 }
 
-async function handleAuthSubmit(event) {
-  event.preventDefault();
-  const submitter = event.submitter;
-  const mode = submitter?.dataset.authMode || "signin";
-  const email = els.emailInput.value.trim();
-  const password = els.passwordInput.value;
-
-  setAuthMessage("İşlem yapılıyor...", "info");
-  submitter.disabled = true;
+async function checkHealth() {
   try {
-    const result =
-      mode === "signup"
-        ? await supabase.auth.signUp({ email, password })
-        : await supabase.auth.signInWithPassword({ email, password });
-
-    if (result.error) throw result.error;
-
-    if (mode === "signup" && !result.data.session) {
-      setAuthMessage("Kayıt oluşturuldu. Supabase e-posta doğrulaması istiyorsa gelen kutunu kontrol et.", "success");
-      showToast("Kayıt oluşturuldu.");
-      return;
-    }
-
-    state.user = result.data.user || result.data.session?.user || state.user;
-    setAuthMessage("Oturum açıldı.", "success");
-    if (state.user) await loadWorkspace();
-    render();
-  } catch (error) {
-    const message = translateAuthError(error.message || "Giriş işlemi tamamlanamadı.");
-    setAuthMessage(message, "error");
-    showToast(message);
-  } finally {
-    submitter.disabled = false;
+    const response = await fetch("/api/health");
+    const data = await response.json();
+    state.apiLive = Boolean(data.aiEnabled);
+  } catch {
+    state.apiLive = false;
   }
+
+  els.statusDot.classList.toggle("live", state.apiLive);
+  els.modePill.classList.toggle("live", state.apiLive);
+  els.statusTitle.textContent = state.apiLive ? "AI aktif" : "Demo mod";
+  els.statusCopy.textContent = state.apiLive
+    ? "Render uzerindeki API gercek AI yanitlari uretiyor."
+    : "OPENAI_API_KEY eklenince ayni panel gercek AI ile calisir.";
+  els.modePill.textContent = state.apiLive ? "AI aktif" : "Demo mod";
 }
 
-async function signOut() {
-  if (state.user) await supabase.auth.signOut();
-  state.user = null;
-  state.demoMode = false;
-  state.files = [];
-  state.folders = [...DEFAULT_FOLDERS];
-  state.activeFolder = "all";
-  state.lastSyncedAt = null;
-  render();
-}
+async function generateMaterial(event) {
+  event.preventDefault();
+  const payload = readForm();
 
-function startDemo() {
-  const now = Date.now();
-  state.user = null;
-  state.demoMode = true;
-  state.activeFolder = "all";
-  state.view = "grid";
-  state.sortBy = "newest";
-  state.folders = [...DEFAULT_FOLDERS, ...DEMO_FOLDERS];
-  state.sharedFiles = [];
-  state.files = DEMO_FILES.map((file, index) => {
-    const path = `demo/${file.folder}/${index + 1}-${sanitizeFileName(file.name)}`;
-    if (file.shared) state.sharedFiles.push(path);
-    return {
-      id: path,
-      path,
-      name: file.name,
-      type: file.type,
-      size: Math.round(file.size),
-      folder: file.folder,
-      shared: file.shared,
-      createdAt: now - file.ageHours * 60 * 60 * 1000,
-    };
-  });
-  state.lastSyncedAt = new Date();
-  setAuthMessage("", "info");
-  render();
-  showToast("Demo çalışma alanı açıldı.");
-}
-
-function handleDocumentClick(event) {
-  const folderActionButton = event.target.closest("[data-folder-action]");
-  if (folderActionButton) {
-    const folder = state.folders.find((item) => item.id === folderActionButton.dataset.folderId);
-    if (!folder) return;
-
-    if (folderActionButton.dataset.folderAction === "rename") openFolderDialog(folder);
-    if (folderActionButton.dataset.folderAction === "delete") deleteFolder(folder);
+  if (!payload.topic) {
+    showToast("Once bir konu yaz.");
     return;
   }
 
-  const navButton = event.target.closest("[data-folder]");
-  if (navButton) {
-    state.activeFolder = navButton.dataset.folder;
-    render();
-    return;
-  }
-
-  const viewButton = event.target.closest("[data-view]");
-  if (viewButton) {
-    state.view = viewButton.dataset.view;
-    render();
-    return;
-  }
-
-  const actionButton = event.target.closest("[data-action]");
-  if (!actionButton) return;
-
-  const file = state.files.find((item) => item.id === actionButton.dataset.id);
-  if (!file) return;
-
-  if (actionButton.dataset.action === "share") shareFile(file);
-  if (actionButton.dataset.action === "download") downloadFile(file);
-  if (actionButton.dataset.action === "delete") deleteFile(file);
-}
-
-async function handleFiles(event) {
-  const files = Array.from(event.target.files || []);
-  if (!files.length || (!state.user && !state.demoMode)) return;
-
-  const incomingUsage = files.reduce((sum, file) => sum + file.size, 0);
-  if (getUsage() + incomingUsage > QUOTA_BYTES) {
-    showToast("Depolama kotası aşılıyor.");
-    event.target.value = "";
-    return;
-  }
-
-  if (state.demoMode) {
-    const now = Date.now();
-    const demoFiles = files.map((file, index) => {
-      const folder = inferFolder(file);
-      const path = `demo/${folder}/${now}-${index}-${sanitizeFileName(file.name)}`;
-      return {
-        id: path,
-        path,
-        name: file.name,
-        type: file.type || "application/octet-stream",
-        size: file.size,
-        folder,
-        shared: false,
-        createdAt: now - index,
-      };
-    });
-    state.files = [...demoFiles, ...state.files];
-    state.lastSyncedAt = new Date();
-    event.target.value = "";
-    render();
-    showToast(`${files.length} demo dosyası eklendi.`);
-    return;
-  }
-
-  for (const file of files) {
-    const folder = inferFolder(file);
-    const path = `${state.user.id}/${folder}/${Date.now()}-${sanitizeFileName(file.name)}`;
-    const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
-      cacheControl: "3600",
-      upsert: false,
-    });
-
-    if (error) {
-      showToast(error.message || "Dosya yüklenemedi.");
-      event.target.value = "";
-      return;
-    }
-  }
-
-  event.target.value = "";
-  await loadFiles();
-  render();
-  showToast(`${files.length} dosya yüklendi.`);
-}
-
-async function handleFolderSave(event) {
-  if (event.submitter?.value !== "save") return;
-
-  const name = els.folderNameInput.value.trim();
-  if (!name) return;
-
-  const editingId = els.folderForm.dataset.editingFolder || "";
-  const id = slugify(name);
-  if (state.folders.some((folder) => folder.id === id && folder.id !== editingId)) {
-    showToast("Bu klasör zaten var.");
-    event.preventDefault();
-    return;
-  }
-
-  if (editingId) {
-    await renameFolder(editingId, id, name, event);
-    return;
-  }
-
-  await createFolder(id, name, event);
-}
-
-async function createFolder(id, name, event) {
-  if (state.demoMode) {
-    state.folders.push({ id, name, system: false });
-    state.activeFolder = id;
-    state.lastSyncedAt = new Date();
-    syncFolderNav();
-    render();
-    showToast("Demo klasörü oluşturuldu.");
-    return;
-  }
-
-  const { data, error } = await supabase
-    .from("folders")
-    .insert({ slug: id, name })
-    .select("slug, name")
-    .single();
-
-  if (error) {
-    showToast(error.message || "Klasör oluşturulamadı.");
-    event.preventDefault();
-    return;
-  }
-
-  const folder = { id: data.slug, name: data.name, system: false };
-  state.folders.push(folder);
-  state.activeFolder = id;
-  syncFolderNav();
-  render();
-  showToast("Klasör oluşturuldu.");
-}
-
-async function renameFolder(oldId, newId, name, event) {
-  const folder = state.folders.find((item) => item.id === oldId);
-  if (!folder || folder.system) return;
-
-  const folderFiles = state.files.filter((file) => file.folder === oldId);
-  const nextSlug = folderFiles.length ? oldId : newId;
-
-  if (state.demoMode) {
-    folder.id = nextSlug;
-    folder.name = name;
-    if (!folderFiles.length) {
-      state.files.forEach((file) => {
-        if (file.folder === oldId) file.folder = nextSlug;
-      });
-    }
-    if (state.activeFolder === oldId) state.activeFolder = nextSlug;
-    state.lastSyncedAt = new Date();
-    render();
-    showToast("Demo klasörü güncellendi.");
-    return;
-  }
-
-  const { data, error } = await supabase
-    .from("folders")
-    .update({ slug: nextSlug, name })
-    .eq("slug", oldId)
-    .select("slug, name")
-    .single();
-
-  if (error) {
-    showToast(error.message || "Klasör güncellenemedi.");
-    event.preventDefault();
-    return;
-  }
-
-  folder.id = data.slug;
-  folder.name = data.name;
-  if (state.activeFolder === oldId) state.activeFolder = data.slug;
-  await loadWorkspace();
-  if (state.folders.some((item) => item.id === data.slug)) state.activeFolder = data.slug;
-  render();
-  showToast(folderFiles.length && oldId !== newId ? "Klasör adı güncellendi; içindeki dosyalar korundu." : "Klasör güncellendi.");
-}
-
-async function deleteFolder(folder) {
-  if (folder.system) return;
-
-  const folderFiles = state.files.filter((file) => file.folder === folder.id);
-  if (folderFiles.length) {
-    showToast("Bu klasör boş değil. Önce içindeki dosyaları sil.");
-    return;
-  }
-
-  const confirmed = window.confirm(`"${folder.name}" klasörü silinsin mi?`);
-  if (!confirmed) return;
-
-  if (state.demoMode) {
-    state.folders = state.folders.filter((item) => item.id !== folder.id);
-    if (state.activeFolder === folder.id) state.activeFolder = "all";
-    state.lastSyncedAt = new Date();
-    render();
-    showToast("Demo klasörü silindi.");
-    return;
-  }
-
-  const { error } = await supabase.from("folders").delete().eq("slug", folder.id);
-  if (error) {
-    showToast(error.message || "Klasör silinemedi.");
-    return;
-  }
-
-  state.folders = state.folders.filter((item) => item.id !== folder.id);
-  if (state.activeFolder === folder.id) state.activeFolder = "all";
-  render();
-  showToast("Klasör silindi.");
-}
-
-async function loadWorkspace() {
   setLoading(true);
   try {
-    await loadFolders();
-    await loadFiles();
-    state.lastSyncedAt = new Date();
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Icerik uretilemedi.");
+
+    state.currentOutput = data.content;
+    state.currentMeta = {
+      ...payload,
+      source: data.source || "demo",
+      createdAt: new Date().toISOString(),
+    };
+    state.apiLive = data.source === "openai";
+    els.outputTitle.textContent = `${typeLabel(payload.type)}: ${payload.topic}`;
+    renderOutput(data.content);
+    await checkHealth();
+    showToast(data.source === "openai" ? "AI icerigi hazir." : "Demo icerik hazir.");
+  } catch (error) {
+    const fallback = buildDemoMaterial(payload);
+    state.currentOutput = fallback;
+    state.currentMeta = { ...payload, source: "demo", createdAt: new Date().toISOString() };
+    els.outputTitle.textContent = `${typeLabel(payload.type)}: ${payload.topic}`;
+    renderOutput(fallback);
+    showToast(error.message || "Demo icerik olusturuldu.");
   } finally {
     setLoading(false);
   }
 }
 
-async function refreshWorkspace() {
-  if (state.isLoading) return;
-  if (state.demoMode) {
-    state.lastSyncedAt = new Date();
-    render();
-    showToast("Demo çalışma alanı güncellendi.");
+function readForm() {
+  return {
+    topic: els.topic.value.trim(),
+    level: els.level.value,
+    type: els.type.value,
+    duration: els.duration.value,
+    tone: els.tone.value,
+    goal: els.goal.value.trim(),
+  };
+}
+
+function setLoading(isLoading) {
+  els.generate.disabled = isLoading;
+  els.generate.textContent = isLoading ? "Uretiliyor..." : "Icerik uret";
+  els.modePill.textContent = isLoading ? "Calisiyor" : state.apiLive ? "AI aktif" : "Demo mod";
+}
+
+function renderOutput(markdown) {
+  els.outputBox.innerHTML = `<article class="markdown-output">${markdownToHtml(markdown)}</article>`;
+}
+
+function markdownToHtml(markdown) {
+  const lines = markdown.split(/\r?\n/);
+  let html = "";
+  let listType = null;
+  let inTable = false;
+
+  const closeList = () => {
+    if (!listType) return;
+    html += `</${listType}>`;
+    listType = null;
+  };
+
+  const closeTable = () => {
+    if (!inTable) return;
+    html += "</tbody></table>";
+    inTable = false;
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) {
+      closeList();
+      closeTable();
+      continue;
+    }
+
+    const heading = line.match(/^#{1,3}\s+(.+)/);
+    if (heading) {
+      closeList();
+      closeTable();
+      html += `<h3>${inlineFormat(heading[1])}</h3>`;
+      continue;
+    }
+
+    if (line.startsWith("|") && line.endsWith("|")) {
+      closeList();
+      const cells = line
+        .slice(1, -1)
+        .split("|")
+        .map((cell) => cell.trim());
+      const isDivider = cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+      if (isDivider) continue;
+
+      if (!inTable) {
+        html += "<table><tbody>";
+        inTable = true;
+      }
+
+      const cellTag = html.endsWith("<tbody>") ? "th" : "td";
+      html += `<tr>${cells.map((cell) => `<${cellTag}>${inlineFormat(cell)}</${cellTag}>`).join("")}</tr>`;
+      continue;
+    }
+
+    const ordered = line.match(/^\d+\.\s+(.+)/);
+    if (ordered) {
+      closeTable();
+      if (listType !== "ol") {
+        closeList();
+        html += "<ol>";
+        listType = "ol";
+      }
+      html += `<li>${inlineFormat(ordered[1])}</li>`;
+      continue;
+    }
+
+    const bullet = line.match(/^[-*]\s+(.+)/);
+    if (bullet) {
+      closeTable();
+      if (listType !== "ul") {
+        closeList();
+        html += "<ul>";
+        listType = "ul";
+      }
+      html += `<li>${inlineFormat(bullet[1])}</li>`;
+      continue;
+    }
+
+    closeList();
+    closeTable();
+    html += `<p>${inlineFormat(line)}</p>`;
+  }
+
+  closeList();
+  closeTable();
+  return html;
+}
+
+function inlineFormat(value) {
+  return escapeHtml(value)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/`(.+?)`/g, "<code>$1</code>");
+}
+
+function saveOutput() {
+  if (!state.currentOutput || !state.currentMeta) {
+    showToast("Kaydedilecek icerik yok.");
     return;
   }
-  if (!state.user) return;
-  await loadWorkspace();
-  render();
-  showToast("Çalışma alanı güncellendi.");
+
+  const item = {
+    id: crypto.randomUUID(),
+    title: `${typeLabel(state.currentMeta.type)}: ${state.currentMeta.topic}`,
+    content: state.currentOutput,
+    meta: state.currentMeta,
+  };
+
+  state.materials = [item, ...state.materials].slice(0, 80);
+  saveMaterials();
+  renderLibrary();
+  showToast("Materyal kutuphaneye kaydedildi.");
 }
 
-async function loadFolders() {
-  if (!state.user) return;
+async function copyOutput() {
+  if (!state.currentOutput) {
+    showToast("Kopyalanacak icerik yok.");
+    return;
+  }
+  await navigator.clipboard?.writeText(state.currentOutput);
+  showToast("Icerik panoya kopyalandi.");
+}
 
-  const { data, error } = await supabase.from("folders").select("slug, name").order("created_at");
+function downloadOutput() {
+  if (!state.currentOutput || !state.currentMeta) {
+    showToast("Indirilecek icerik yok.");
+    return;
+  }
+  downloadText(slugify(state.currentMeta.topic) + ".md", state.currentOutput);
+}
 
-  if (error) {
-    state.folders = [...DEFAULT_FOLDERS];
-    showToast(error.message || "Klasörler okunamadı.");
+function printOutput() {
+  if (!state.currentOutput || !state.currentMeta) {
+    showToast("Yazdirilacak icerik yok.");
     return;
   }
 
-  const customFolders = (data || []).map((folder) => ({
-    id: folder.slug,
-    name: folder.name,
-    system: false,
-  }));
-  state.folders = [...DEFAULT_FOLDERS, ...customFolders];
-}
-
-async function loadFiles() {
-  if (!state.user) return;
-
-  const folders = state.folders.filter((folder) => folder.id !== "shared");
-  const results = await Promise.all(folders.map((folder) => listFolder(folder.id)));
-  state.files = results.flat().sort((a, b) => b.createdAt - a.createdAt);
-}
-
-async function listFolder(folder) {
-  const prefix = `${state.user.id}/${folder}`;
-  const { data, error } = await supabase.storage.from(BUCKET).list(prefix, {
-    limit: 100,
-    sortBy: { column: "created_at", order: "desc" },
-  });
-
-  if (error) {
-    showToast(error.message || "Dosyalar okunamadı.");
-    return [];
+  const printWindow = window.open("", "_blank", "width=900,height=700");
+  if (!printWindow) {
+    showToast("Tarayici yazdirma penceresini engelledi.");
+    return;
   }
 
-  return (data || [])
-    .filter((item) => item.name !== ".emptyFolderPlaceholder")
-    .map((item) => ({
-      id: `${prefix}/${item.name}`,
-      path: `${prefix}/${item.name}`,
-      name: stripUploadPrefix(item.name),
-      type: item.metadata?.mimetype || "application/octet-stream",
-      size: item.metadata?.size || 0,
-      folder,
-      shared: state.sharedFiles.includes(`${prefix}/${item.name}`),
-      createdAt: new Date(item.created_at || item.updated_at || Date.now()).getTime(),
-    }));
+  printWindow.document.write(`
+    <!doctype html>
+    <html lang="tr">
+      <head>
+        <meta charset="UTF-8" />
+        <title>${escapeHtml(state.currentMeta.topic)}</title>
+        <style>
+          body { color: #17202a; font-family: Arial, sans-serif; line-height: 1.55; margin: 32px; }
+          h1, h2, h3 { margin-bottom: 8px; }
+          li { margin-bottom: 6px; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid #d8e0e7; padding: 8px; text-align: left; vertical-align: top; }
+        </style>
+      </head>
+      <body>${markdownToHtml(state.currentOutput)}</body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
 }
 
-function render() {
-  const signedIn = Boolean(state.user || state.demoMode);
-  els.authView.hidden = signedIn;
-  els.dashboard.hidden = !signedIn;
-  els.dashboard.classList.toggle("is-loading", state.isLoading);
-  els.signOutButton.hidden = !signedIn;
-  els.accountName.textContent = state.demoMode ? "Demo çalışma alanı" : state.user?.email || "Oturum kapalı";
-  els.sortSelect.value = state.sortBy;
-  els.refreshButton.disabled = state.isLoading;
+function clearStudio() {
+  els.form.reset();
+  state.currentOutput = "";
+  state.currentMeta = null;
+  els.outputTitle.textContent = "Hazir icerik burada gorunur";
+  els.outputBox.innerHTML = `
+    <div class="empty-state">
+      <strong>Bir konu yazip uretime basla.</strong>
+      <span>Ders plani, quiz, ozet veya kart seti olusturabilirsin.</span>
+    </div>
+  `;
+}
 
-  syncFolderNav();
+function fillExample() {
+  els.topic.value = "Yapay zeka okuryazarligi";
+  els.level.value = "Lise";
+  els.type.value = "lesson";
+  els.duration.value = "40 dakika";
+  els.tone.value = "Sade ve anlasilir";
+  els.goal.value = "Ogrenciler AI araclarini bilincli kullanmayi, kaynak kontrolunu ve etik riskleri tartissin.";
+  location.hash = "#studio";
+  showToast("Ornek konu dolduruldu.");
+}
 
-  document.querySelectorAll("[data-folder]").forEach((button) => {
-    button.classList.toggle("active", button.dataset.folder === state.activeFolder);
+function renderLibrary() {
+  els.savedCount.textContent = state.materials.length;
+  const query = els.librarySearch.value.trim().toLocaleLowerCase("tr-TR");
+  const selectedType = els.libraryTypeFilter.value;
+  const visible = state.materials.filter((item) => {
+    const haystack = `${item.title} ${item.content}`.toLocaleLowerCase("tr-TR");
+    const matchesType = selectedType === "all" || item.meta.type === selectedType;
+    return matchesType && haystack.includes(query);
   });
 
-  document.querySelectorAll("[data-view]").forEach((button) => {
-    button.classList.toggle("active", button.dataset.view === state.view);
-  });
+  if (!visible.length) {
+    els.libraryGrid.innerHTML = `
+      <div class="empty-state">
+        <strong>Henuz kayitli materyal yok.</strong>
+        <span>Urettigin icerikleri kaydederek burada arsivleyebilirsin.</span>
+      </div>
+    `;
+    return;
+  }
 
-  renderStats();
-  renderInsights();
-  renderFiles();
+  els.libraryGrid.innerHTML = visible.map(libraryCardTemplate).join("");
 }
 
-function renderStats() {
-  const usage = getUsage();
-  const percent = getUsagePercent(usage);
-  els.fileCount.textContent = state.files.length;
-  els.folderCount.textContent = state.folders.filter((folder) => folder.id !== "shared").length;
-  els.shareCount.textContent = state.files.filter((file) => file.shared).length;
-  els.storagePercent.textContent = percent.label;
-  els.storageMeter.style.width = percent.meterWidth;
-  els.storageText.textContent = `${formatSize(usage)} / ${formatSize(QUOTA_BYTES)}`;
-  els.lastSyncText.textContent = state.lastSyncedAt ? `Son güncelleme ${formatTime(state.lastSyncedAt)}` : "Henüz güncellenmedi";
-}
-
-function renderInsights() {
-  const usage = getUsage();
-  const largestFile = [...state.files].sort((a, b) => b.size - a.size)[0];
-  const recentFiles = [...state.files].sort((a, b) => b.createdAt - a.createdAt).slice(0, 4);
-
-  els.storageHealthText.textContent = getStorageHealth(usage);
-  els.largestFileText.textContent = largestFile ? `${largestFile.name} · ${formatSize(largestFile.size)}` : "Henüz dosya yok";
-  els.activityList.innerHTML = recentFiles.length ? recentFiles.map(activityTemplate).join("") : emptyActivityTemplate();
-}
-
-function renderFiles() {
-  const files = getVisibleFiles();
-  els.currentFolderTitle.textContent = getFolderTitle();
-  els.resultCount.textContent = `${files.length} öğe`;
-  els.emptyState.hidden = files.length > 0;
-  els.fileGrid.className = `file-grid ${state.view === "list" ? "list" : ""}`;
-  els.fileGrid.setAttribute("aria-busy", state.isLoading ? "true" : "false");
-  els.fileGrid.innerHTML = files.map(fileCardTemplate).join("");
-}
-
-function getVisibleFiles() {
-  const query = els.searchInput.value.trim().toLocaleLowerCase("tr-TR");
-  return state.files
-    .filter((file) => {
-      if (state.activeFolder === "all") return true;
-      if (state.activeFolder === "shared") return file.shared;
-      return file.folder === state.activeFolder;
-    })
-    .filter((file) => file.name.toLocaleLowerCase("tr-TR").includes(query))
-    .sort(sortFiles);
-}
-
-function sortFiles(a, b) {
-  if (state.sortBy === "name") return a.name.localeCompare(b.name, "tr-TR", { sensitivity: "base" });
-  if (state.sortBy === "size") return b.size - a.size;
-  return b.createdAt - a.createdAt;
-}
-
-function fileCardTemplate(file) {
-  const extension = file.name.includes(".") ? file.name.split(".").pop().slice(0, 4).toUpperCase() : "FILE";
-  const sharedClass = file.shared ? "shared" : "";
-  const sharedBadge = file.shared ? '<span class="file-badge">Paylaşıldı</span>' : "";
+function libraryCardTemplate(item) {
+  const summary = item.content.replace(/[#*`>-]/g, " ").replace(/\s+/g, " ").trim();
+  const date = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
+    .format(new Date(item.meta.createdAt));
 
   return `
-    <article class="file-card">
-      <div class="file-symbol ${sharedClass}" aria-hidden="true">${extension}</div>
-      <div class="file-meta">
-        <strong title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</strong>
-        <span>${formatSize(file.size)} · ${formatDate(file.createdAt)}</span>
-        ${sharedBadge}
-      </div>
-      <div class="file-actions">
-        <button type="button" data-action="share" data-id="${escapeHtml(file.id)}" title="Paylaş" aria-label="Paylaş">↗</button>
-        <button type="button" data-action="download" data-id="${escapeHtml(file.id)}" title="İndir" aria-label="İndir">↓</button>
-        <button type="button" data-action="delete" data-id="${escapeHtml(file.id)}" title="Sil" aria-label="Sil">×</button>
+    <article class="library-card">
+      <strong title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</strong>
+      <span>${escapeHtml(summary || "Kayitli materyal")}</span>
+      <small>${escapeHtml(item.meta.level)} · ${escapeHtml(date)} · ${escapeHtml(item.meta.source)}</small>
+      <div class="card-actions">
+        <button class="secondary-button" type="button" data-library-action="open" data-id="${item.id}">Ac</button>
+        <button class="secondary-button" type="button" data-library-action="delete" data-id="${item.id}">Sil</button>
       </div>
     </article>
   `;
 }
 
-function activityTemplate(file) {
-  const extension = file.name.includes(".") ? file.name.split(".").pop().slice(0, 3).toUpperCase() : "DOC";
+function handleNavigation(event) {
+  const link = event.target.closest("[data-view-link]");
+  if (link) {
+    document.querySelectorAll("[data-view-link]").forEach((item) => item.classList.remove("active"));
+    link.classList.add("active");
+    return;
+  }
 
-  return `
-    <div class="activity-item">
-      <span class="activity-dot" aria-hidden="true">${escapeHtml(extension)}</span>
-      <span class="activity-copy">
-        <strong title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</strong>
-        <span>${getFolderName(file.folder)} · ${formatDate(file.createdAt)}</span>
-      </span>
-    </div>
-  `;
+  const action = event.target.closest("[data-library-action]");
+  if (!action) return;
+
+  const item = state.materials.find((material) => material.id === action.dataset.id);
+  if (!item) return;
+
+  if (action.dataset.libraryAction === "open") {
+    state.currentOutput = item.content;
+    state.currentMeta = item.meta;
+    els.outputTitle.textContent = item.title;
+    renderOutput(item.content);
+    location.hash = "#studio";
+    showToast("Materyal acildi.");
+  }
+
+  if (action.dataset.libraryAction === "delete") {
+    state.materials = state.materials.filter((material) => material.id !== item.id);
+    saveMaterials();
+    renderLibrary();
+    showToast("Materyal silindi.");
+  }
 }
 
-function emptyActivityTemplate() {
-  return `
-    <div class="activity-item">
-      <span class="activity-dot" aria-hidden="true">+</span>
-      <span class="activity-copy">
-        <strong>Henüz hareket yok</strong>
-        <span>Dosya yüklediğinde burada görünür.</span>
-      </span>
-    </div>
-  `;
+function syncView() {
+  const view = (location.hash || "#studio").replace("#", "");
+  document.querySelectorAll(".view-panel").forEach((panel) => panel.classList.remove("active"));
+  document.querySelector(`#${view}View`)?.classList.add("active");
+  document.querySelectorAll("[data-view-link]").forEach((link) => {
+    link.classList.toggle("active", link.dataset.viewLink === view);
+  });
 }
 
-async function shareFile(file) {
-  if (state.demoMode) {
-    file.shared = true;
-    if (!state.sharedFiles.includes(file.path)) state.sharedFiles.push(file.path);
-    await navigator.clipboard?.writeText(`${location.origin}${location.pathname}#demo-share=${encodeURIComponent(file.name)}`);
-    render();
-    showToast("Demo paylaşım linki panoya kopyalandı.");
+function exportLibrary() {
+  if (!state.materials.length) {
+    showToast("Disa aktarilacak materyal yok.");
     return;
   }
-
-  const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(file.path, 60 * 60);
-  if (error) {
-    showToast(error.message || "Paylaşım linki oluşturulamadı.");
-    return;
-  }
-
-  await navigator.clipboard?.writeText(data.signedUrl);
-  file.shared = true;
-  if (!state.sharedFiles.includes(file.path)) {
-    state.sharedFiles.push(file.path);
-    saveSharedFiles();
-  }
-  render();
-  showToast("1 saatlik paylaşım linki panoya kopyalandı.");
+  const content = state.materials
+    .map((item) => `# ${item.title}\n\n${item.content}`)
+    .join("\n\n---\n\n");
+  downloadText("akillab-kutuphane.md", content);
 }
 
-async function downloadFile(file) {
-  if (state.demoMode) {
-    const blob = new Blob([`Demo dosya: ${file.name}`], { type: "text/plain;charset=utf-8" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = file.name.replace(/\.[^.]+$/, ".txt");
-    link.click();
-    URL.revokeObjectURL(link.href);
-    showToast("Demo dosyası indirildi.");
-    return;
+function buildDemoMaterial(payload) {
+  const title = `${typeLabel(payload.type)}: ${payload.topic}`;
+  if (payload.type === "quiz") {
+    return `# ${title}
+
+## Hedef
+${payload.level} seviyesi icin ${payload.topic} konusunu olcmek ve eksik kavramlari hizlica gormek.
+
+## Sorular
+1. ${payload.topic} konusunun temel amaci nedir?
+2. Bu konuyla ilgili gunluk hayattan bir ornek ver.
+3. Asagidaki ifadeyi acikla: "${payload.topic} sadece bilgi degil, uygulama gerektirir."
+4. Bir yanlis anlama yaz ve dogrusunu belirt.
+5. Konuyu 3 maddede ozetle.
+
+## Cevap anahtari
+- Cevaplar kavram dogrulugu, ornek kalitesi ve acik ifade uzerinden degerlendirilir.
+- Her soru 20 puandir.
+- Kisa geri bildirim: Guclu kavramlari koru, zayif kalan kavramlar icin tekrar etkinligi yap.`;
   }
 
-  const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(file.path, 60);
-  if (error) {
-    showToast(error.message || "İndirme linki oluşturulamadı.");
-    return;
+  if (payload.type === "flashcards") {
+    return `# ${title}
+
+## Kart seti
+- **Kart 1:** ${payload.topic} nedir? / Temel kavrami tek cumlede acikla.
+- **Kart 2:** En onemli 3 anahtar kelime nedir? / Kavram, ornek, uygulama.
+- **Kart 3:** Nerede kullanilir? / Gercek yasamdan bir durumla bagla.
+- **Kart 4:** Sik hata nedir? / Ezberlemek ama iliski kurmamak.
+- **Kart 5:** Mini gorev nedir? / Konuyu 90 saniyelik bir anlatima donustur.
+
+## Tekrar onerisi
+Ilk tekrar dersten hemen sonra, ikinci tekrar 24 saat sonra, ucuncu tekrar hafta sonunda yapilir.`;
   }
 
+  if (payload.type === "summary") {
+    return `# ${title}
+
+## Kisa ozet
+${payload.topic}, ${payload.level} duzeyinde once temel kavramlar, sonra ornekler ve en son uygulama uzerinden islenmelidir.
+
+## Ana fikirler
+- Konuyu tek bir buyuk soru etrafinda toparla.
+- Ogrenciden sadece tanim degil, ornek ve karsilastirma iste.
+- ${payload.tone} anlatim kullan.
+- ${payload.duration} icinde bir giris, bir etkinlik ve bir cikis bileti planla.
+
+## Cikis bileti
+Ogrenciler dersten cikmadan once "${payload.topic} konusunda bugun ogrendigim en net fikir..." cumlesini tamamlar.`;
+  }
+
+  if (payload.type === "assignment") {
+    return `# ${title}
+
+## Odev amaci
+${payload.level} seviyesi icin ${payload.topic} konusunu arastirma, uygulama ve kisa sunumla pekistirmek.
+
+## Yonetge
+1. Konuyu 5 temel kavramla acikla.
+2. Gercek hayattan bir ornek bul.
+3. Ornegi ders kavramlariyla iliskilendir.
+4. 1 sayfalik kisa rapor veya 5 slaytlik sunum hazirla.
+
+## Teslim kriterleri
+- Acik ve duzenli anlatim
+- Kaynak belirtme
+- Ozgun ornek kullanma
+- Zamaninda teslim
+
+## Ek not
+${payload.goal || "Odev bireysel yapilir; isteyen ogrenciler ek bir soru-cevap bolumu ekleyebilir."}`;
+  }
+
+  if (payload.type === "rubric") {
+    return `# ${title}
+
+## Degerlendirme rubrigi
+
+| Kriter | 4 - Cok iyi | 3 - Iyi | 2 - Gelisiyor | 1 - Baslangic |
+| --- | --- | --- | --- | --- |
+| Kavram dogrulugu | Tum kavramlar dogru | Kucuk eksikler var | Bazi kavramlar karisik | Temel kavramlar eksik |
+| Ornek kullanimi | Ozgun ve yerinde | Uygun ama sinirli | Kismen baglantili | Ornek yok veya ilgisiz |
+| Aciklik | Cok net ve duzenli | Anlasilir | Yer yer belirsiz | Takibi zor |
+| Uygulama | Bilgiyi yeni duruma aktarir | Basit uygulama yapar | Yardimla uygular | Uygulama yapamaz |
+
+## Geri bildirim cumlesi
+${payload.topic} konusunda en guclu yanin ..., bir sonraki adimda ... uzerinde calismalisin.`;
+  }
+
+  return `# ${title}
+
+## Ders hedefi
+${payload.level} ogrencileri ${payload.topic} konusunu kavrar, orneklerle aciklar ve kisa bir uygulama uretir.
+
+## Akis
+1. **Giris - 5 dakika:** Merak uyandiran bir soru sor.
+2. **Kavram anlatimi - 10 dakika:** Konuyu ${payload.tone.toLocaleLowerCase("tr-TR")} bir dille acikla.
+3. **Etkinlik - 15 dakika:** Ogrenciler ikili gruplarla bir ornek olusturur.
+4. **Degerlendirme - 5 dakika:** 3 soruluk hizli kontrol yap.
+5. **Kapanis - 5 dakika:** Ogrenciler tek cumlelik ozet yazar.
+
+## Notlar
+${payload.goal || "Bu plan ilk taslaktir; sinif seviyesine gore ornekler ve sureler kolayca degistirilebilir."}
+
+## Olcme
+- Kavram dogrulugu
+- Ornek kalitesi
+- Kisa ve net ifade
+- Derse katilim`;
+}
+
+function typeLabel(type) {
+  return {
+    lesson: "Ders plani",
+    quiz: "Quiz",
+    summary: "Konu ozeti",
+    flashcards: "Kartlar",
+    assignment: "Odev",
+    rubric: "Rubrik",
+  }[type] || "Icerik";
+}
+
+function loadMaterials() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveMaterials() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.materials));
+}
+
+function downloadText(filename, content) {
+  const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
   const link = document.createElement("a");
-  link.href = data.signedUrl;
-  link.download = file.name;
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
   link.click();
-}
-
-async function deleteFile(file) {
-  if (state.demoMode) {
-    state.files = state.files.filter((item) => item.id !== file.id);
-    state.sharedFiles = state.sharedFiles.filter((path) => path !== file.path);
-    state.lastSyncedAt = new Date();
-    render();
-    showToast("Demo dosyası silindi.");
-    return;
-  }
-
-  const { error } = await supabase.storage.from(BUCKET).remove([file.path]);
-  if (error) {
-    showToast(error.message || "Dosya silinemedi.");
-    return;
-  }
-
-  state.sharedFiles = state.sharedFiles.filter((path) => path !== file.path);
-  saveSharedFiles();
-  await loadFiles();
-  render();
-  showToast("Dosya silindi.");
-}
-
-function getFolderTitle() {
-  if (state.activeFolder === "all") return "Tüm dosyalar";
-  return state.folders.find((folder) => folder.id === state.activeFolder)?.name || "Klasör";
-}
-
-function getFolderName(folderId) {
-  return state.folders.find((folder) => folder.id === folderId)?.name || "Klasör";
-}
-
-function syncFolderNav() {
-  document.querySelectorAll("[data-dynamic-folder='true']").forEach((button) => button.remove());
-  state.folders.filter((folder) => !folder.system).forEach(addFolderNavItem);
-}
-
-function addFolderNavItem(folder) {
-  if (document.querySelector(`[data-folder="${folder.id}"]`)) return;
-
-  const button = document.createElement("button");
-  button.className = "nav-item";
-  button.dataset.folder = folder.id;
-  button.dataset.dynamicFolder = "true";
-  button.type = "button";
-  button.innerHTML = `
-    <span class="nav-icon">▤</span>
-    <span>${escapeHtml(folder.name)}</span>
-    <span class="nav-folder-actions">
-      <button type="button" data-folder-action="rename" data-folder-id="${escapeHtml(folder.id)}" title="Yeniden adlandır" aria-label="Yeniden adlandır">✎</button>
-      <button type="button" data-folder-action="delete" data-folder-id="${escapeHtml(folder.id)}" title="Sil" aria-label="Sil">×</button>
-    </span>
-  `;
-  document.querySelector(".nav-list").append(button);
-}
-
-function openFolderDialog(folder = null) {
-  els.folderForm.dataset.editingFolder = folder?.id || "";
-  els.folderDialogTitle.textContent = folder ? "Klasörü düzenle" : "Yeni klasör";
-  els.folderSubmitButton.textContent = folder ? "Kaydet" : "Oluştur";
-  els.folderNameInput.value = folder?.name || "";
-  els.folderDialog.showModal();
-  els.folderNameInput.focus();
-  els.folderNameInput.select();
-}
-
-function inferFolder(file) {
-  if (file.type.startsWith("image/")) return "images";
-  if (state.activeFolder !== "all" && state.activeFolder !== "shared") return state.activeFolder;
-  return "documents";
-}
-
-function getUsage() {
-  return state.files.reduce((sum, file) => sum + file.size, 0);
-}
-
-function getUsagePercent(bytes) {
-  if (bytes === 0) return { label: "0%", meterWidth: "0%" };
-
-  const raw = (bytes / QUOTA_BYTES) * 100;
-  if (raw < 1) return { label: "<1%", meterWidth: "2%" };
-
-  const rounded = Math.min(100, Math.round(raw));
-  return { label: `${rounded}%`, meterWidth: `${rounded}%` };
-}
-
-function getStorageHealth(bytes) {
-  const ratio = bytes / QUOTA_BYTES;
-  if (ratio >= 0.9) return "Kota sınırına yaklaşıyor";
-  if (ratio >= 0.65) return "Alan düzenli takip edilmeli";
-  if (bytes > 0) return "Alan sağlıklı görünüyor";
-  return "Boş alan hazır";
-}
-
-function formatSize(bytes) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-}
-
-function formatDate(timestamp) {
-  return new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "short" }).format(timestamp);
-}
-
-function formatTime(date) {
-  return new Intl.DateTimeFormat("tr-TR", { hour: "2-digit", minute: "2-digit" }).format(date);
-}
-
-function setLoading(isLoading) {
-  state.isLoading = isLoading;
-  els.dashboard?.classList.toggle("is-loading", isLoading);
-  if (els.refreshButton) els.refreshButton.disabled = isLoading;
+  URL.revokeObjectURL(link.href);
 }
 
 function slugify(value) {
@@ -808,28 +567,7 @@ function slugify(value) {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/ı/g, "i")
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-function sanitizeFileName(value) {
-  return value.replace(/[^\w.\-() ]/g, "_");
-}
-
-function stripUploadPrefix(value) {
-  const decoded = value.replace(/_/g, " ");
-  return decoded.replace(/^\d+-/, "");
-}
-
-function loadSharedFiles() {
-  try {
-    return JSON.parse(localStorage.getItem(SHARED_FILES_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function saveSharedFiles() {
-  localStorage.setItem(SHARED_FILES_KEY, JSON.stringify(state.sharedFiles));
+    .replace(/^-|-$/g, "") || "akillab-icerik";
 }
 
 function escapeHtml(value) {
@@ -837,21 +575,6 @@ function escapeHtml(value) {
     const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
     return entities[char];
   });
-}
-
-function translateAuthError(message) {
-  const lower = message.toLocaleLowerCase("tr-TR");
-  if (lower.includes("failed to fetch")) return "Supabase bağlantısı kurulamadı. Project URL veya publishable key yanlış olabilir.";
-  if (lower.includes("invalid login credentials")) return "E-posta veya şifre hatalı. Önce Kayıt ol düğmesiyle hesap oluştur.";
-  if (lower.includes("email not confirmed")) return "E-posta doğrulanmamış. Gelen kutundaki Supabase doğrulama linkine tıkla.";
-  if (lower.includes("user already registered")) return "Bu e-posta zaten kayıtlı. Giriş yap düğmesini kullan.";
-  if (lower.includes("password should be at least")) return "Şifre en az 6 karakter olmalı.";
-  return message;
-}
-
-function setAuthMessage(message, type = "info") {
-  els.authMessage.textContent = message;
-  els.authMessage.className = `auth-message ${type === "info" ? "" : type}`;
 }
 
 function showToast(message) {

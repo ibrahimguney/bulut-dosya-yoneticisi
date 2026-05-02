@@ -1,77 +1,66 @@
-# Bulut Dosya Yoneticisi
+# AkilLab AI Egitim Paneli
 
-Supabase destekli, GitHub Pages uzerinden yayinlanan profesyonel bulut dosya yonetimi arayuzu.
+Render uzerinde surekli yayinda kalabilecek AI destekli egitim icerigi paneli.
 
-**Canli demo:** https://ibrahimguney.github.io/bulut-dosya-yoneticisi/
+## Ozellikler
 
-## One Cikanlar
-
-- Hesap acmadan incelenebilen demo calisma alani
-- E-posta ile Supabase Authentication girisi
-- Dosya yukleme, indirme, silme ve paylasim linki olusturma
-- Sistem klasorleri ve kullanici tarafindan olusturulan ozel klasorler
-- Arama, siralama, kart/liste gorunumu
-- Depolama kotasi, en buyuk dosya ve son hareketler paneli
-- GitHub Pages ve Vercel icin statik yayin mimarisi
-
-## Teknolojiler
-
-- HTML
-- CSS
-- Vanilla JavaScript
-- Supabase Auth
-- Supabase Storage
-- GitHub Pages Actions
+- Ders plani, quiz, konu ozeti, kart seti, odev ve rubrik uretimi
+- Render Web Service uzerinden guvenli AI endpoint'i
+- `OPENAI_API_KEY` yoksa demo mod
+- Kayitli materyal kutuphanesi
+- Arama, tur filtresi, kopyalama, Markdown indirme, yazdirma ve disa aktarma
+- Tek Node servisiyle frontend ve `/api/generate` endpoint'i
 
 ## Yerelde Calistirma
 
 ```bash
-start-server.cmd
+npm.cmd start
 ```
 
-Sunucu varsayilan olarak su adreste acilir:
+Adres:
 
 ```text
 http://localhost:4173
 ```
 
-Statik dosyalar `public` klasorundedir.
-
-## Demo Deneyimi
-
-Canli siteye giren ziyaretciler `Demo olarak incele` dugmesiyle hesap acmadan dashboard'u gorebilir.
-Demo modunda ornek dosyalar, klasorler, paylasim, indirme ve silme aksiyonlari tarayici icinde simule edilir.
-
-## GitHub Pages
-
-Bu repo `public` klasorunu GitHub Pages'e yayinlamak icin hazir workflow icerir:
+Gercek AI uretimi icin ortam degiskenleri:
 
 ```text
-.github/workflows/pages.yml
+OPENAI_API_KEY=...
+OPENAI_MODEL=gpt-5.2
 ```
 
-Repository ayari:
+Anahtar yoksa uygulama demo icerik uretir.
+
+## Render Kurulumu
+
+Render'da servis tipi:
 
 ```text
-Settings > Pages > Source > GitHub Actions
+New > Web Service
 ```
 
-## Vercel
+Ayarlar:
 
-Vercel'de yeni proje olustururken:
+```text
+Runtime: Node
+Build Command: npm install
+Start Command: npm start
+```
 
-- Framework Preset: `Other`
-- Build Command: bos birak
-- Output Directory: `public`
-- Install Command: bos birakilabilir
+Environment bolumune ekle:
 
-## Supabase Kurulumu
+```text
+OPENAI_API_KEY = senin OpenAI API anahtarin
+OPENAI_MODEL = gpt-5.2
+```
 
-1. `supabase-setup.sql` dosyasindaki SQL komutlarini Supabase SQL Editor icinde calistir.
-2. Daha once kurulum yapildiysa kalici klasorler icin `supabase-folders.sql` dosyasini calistir.
-3. Authentication ayarlarinda Email provider'in acik oldugunu kontrol et.
-4. Storage bucket adinin `files` oldugunu dogrula.
+`render.yaml` dosyasi Blueprint olarak da kullanilabilir.
 
-## Proje Durumu
+## Gelistirme Plani
 
-Bu proje portfoyde gosterilebilir statik bir web uygulamasi olarak hazirlandi. Canli demo GitHub Pages uzerinden yayinlanir; Supabase bilgileri dogru oldugunda kalici dosya yonetimi de aktif calisir.
+1. Supabase Auth ile ogretmen hesaplari
+2. Materyallerin veritabaninda saklanmasi
+3. Sinif ve ogrenci modulu
+4. PDF cikti ve paylasim linkleri
+5. Kurum paneli ve abonelik sistemi
