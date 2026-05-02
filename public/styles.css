@@ -582,7 +582,7 @@ textarea:focus {
 }
 
 .library-card strong,
-.library-card span {
+.library-card > span {
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -615,7 +615,7 @@ textarea:focus {
   font-weight: 900;
 }
 
-.library-card span {
+.library-card > span {
   display: -webkit-box;
   color: var(--muted);
   font-size: 0.9rem;

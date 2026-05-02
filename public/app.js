@@ -530,11 +530,11 @@ function renderLibrary() {
 }
 
 function libraryCardTemplate(item) {
-  const summary = item.content.replace(/[#*`>-]/g, " ").replace(/s+/g, " ").trim();
+  const summary = item.content.replace(/[#*`>-]/g, " ").replace(/\s+/g, " ").trim();
   const date = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
     .format(new Date(item.meta.createdAt));
   const sourceLabel = item.meta.source === "openai" ? "AI" : "Demo";
-  const shareLabel = item.shareId ? "Payla??ld?" : "Payla?";
+  const shareLabel = item.shareId ? "Payla&#351;&#305;ld&#305;" : "Payla&#351;";
 
   return `
     <article class="library-card">
@@ -542,10 +542,10 @@ function libraryCardTemplate(item) {
         <strong title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</strong>
         <span class="source-badge">${escapeHtml(sourceLabel)}</span>
       </div>
-      <span>${escapeHtml(summary || "Kay?tl? materyal")}</span>
+      <span>${escapeHtml(summary || "Kayıtlı materyal")}</span>
       <small>${escapeHtml(typeLabel(item.meta.type))} / ${escapeHtml(item.meta.level)} / ${escapeHtml(date)}</small>
       <div class="card-actions">
-        <button class="secondary-button" type="button" data-library-action="open" data-id="${item.id}">D?zenle</button>
+        <button class="secondary-button" type="button" data-library-action="open" data-id="${item.id}">D&uuml;zenle</button>
         <button class="secondary-button" type="button" data-library-action="share" data-id="${item.id}">${shareLabel}</button>
         <button class="secondary-button" type="button" data-library-action="delete" data-id="${item.id}">Sil</button>
       </div>
