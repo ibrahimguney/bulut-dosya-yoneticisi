@@ -591,6 +591,30 @@ textarea:focus {
   white-space: nowrap;
 }
 
+.library-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.library-card-head strong {
+  min-width: 0;
+}
+
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: 999px;
+  background: #edf8f5;
+  color: var(--brand);
+  padding: 0 9px;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
 .library-card span {
   display: -webkit-box;
   color: var(--muted);

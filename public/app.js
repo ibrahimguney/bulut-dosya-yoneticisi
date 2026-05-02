@@ -530,24 +530,28 @@ function renderLibrary() {
 }
 
 function libraryCardTemplate(item) {
-  const summary = item.content.replace(/[#*`>-]/g, " ").replace(/\s+/g, " ").trim();
+  const summary = item.content.replace(/[#*`>-]/g, " ").replace(/s+/g, " ").trim();
   const date = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
     .format(new Date(item.meta.createdAt));
+  const sourceLabel = item.meta.source === "openai" ? "AI" : "Demo";
+  const shareLabel = item.shareId ? "Payla??ld?" : "Payla?";
 
   return `
     <article class="library-card">
-      <strong title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</strong>
-      <span>${escapeHtml(summary || "Kayıtlı materyal")}</span>
-      <small>${escapeHtml(item.meta.level)} · ${escapeHtml(date)} · ${escapeHtml(item.meta.source)}</small>
+      <div class="library-card-head">
+        <strong title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</strong>
+        <span class="source-badge">${escapeHtml(sourceLabel)}</span>
+      </div>
+      <span>${escapeHtml(summary || "Kay?tl? materyal")}</span>
+      <small>${escapeHtml(typeLabel(item.meta.type))} / ${escapeHtml(item.meta.level)} / ${escapeHtml(date)}</small>
       <div class="card-actions">
-        <button class="secondary-button" type="button" data-library-action="open" data-id="${item.id}">Ac</button>
-        <button class="secondary-button" type="button" data-library-action="share" data-id="${item.id}">Paylaş</button>
+        <button class="secondary-button" type="button" data-library-action="open" data-id="${item.id}">D?zenle</button>
+        <button class="secondary-button" type="button" data-library-action="share" data-id="${item.id}">${shareLabel}</button>
         <button class="secondary-button" type="button" data-library-action="delete" data-id="${item.id}">Sil</button>
       </div>
     </article>
   `;
 }
-
 async function handleNavigation(event) {
   const link = event.target.closest("[data-view-link]");
   if (link) {
@@ -569,7 +573,7 @@ async function handleNavigation(event) {
     els.outputTitle.textContent = item.title;
     renderOutput(item.content);
     location.hash = "#studio";
-    showToast("Materyal açıldı.");
+    showToast("Materyal düzenleme için açıldı.");
   }
 
   if (action.dataset.libraryAction === "share") {
@@ -599,6 +603,13 @@ async function shareMaterial(item) {
   }
 
   const shareId = item.shareId || crypto.randomUUID();
+  if (item.shareId) {
+    const url = `${location.origin}${location.pathname}#share=${encodeURIComponent(item.shareId)}`;
+    await navigator.clipboard?.writeText(url);
+    showToast("Mevcut paylaşım linki panoya kopyalandı.");
+    return;
+  }
+
   const { data, error } = await state.supabase
     .from("materials")
     .update({ share_id: shareId })
