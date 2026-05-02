@@ -5,3 +5,4 @@ server.err
 server.*.log
 *.local
 ai-evolution-lab/
+mini-crm-paneli/
