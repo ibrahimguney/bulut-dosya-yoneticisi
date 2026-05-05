@@ -18,8 +18,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Build pages artifact
+        run: |
+          mkdir -p pages-site/panel
+          cp -R github-pages/. pages-site/
+          cp -R public/. pages-site/panel/
+          cp -R ai-evolution-lab pages-site/ai-evolution-lab
+          cp -R fikir-reaktoru pages-site/fikir-reaktoru
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: public
+          path: pages-site
       - id: deployment
         uses: actions/deploy-pages@v4

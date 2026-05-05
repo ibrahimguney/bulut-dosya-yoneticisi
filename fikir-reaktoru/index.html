@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fikir Reaktörü</title>
+    <meta
+      name="description"
+      content="Konu, hedef kitle ve zorluğa göre özgün mini proje fikirleri üreten web uygulaması."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Fikir Reaktörü ana sayfa">
+        <span class="brand-mark" aria-hidden="true">FR</span>
+        <span>
+          <strong>Fikir Reaktörü</strong>
+          <small>Mini proje üretim laboratuvarı</small>
+        </span>
+      </a>
+      <nav aria-label="Sayfa bolumleri">
+        <a href="#reactor">Reaktor</a>
+        <a href="#plan">Plan</a>
+        <a href="#tasks">Görevler</a>
+        <a href="#stats">Özet</a>
+        <a href="#compare">Alternatifler</a>
+        <a href="#saved">Kayıtlar</a>
+        <a href="#learn">Öğren</a>
+      </nav>
+      <button class="learn-toggle" id="learnModeButton" type="button" aria-pressed="false">Öğrenme modu</button>
+      <button class="learn-toggle" id="themeButton" type="button" aria-pressed="false">Koyu tema</button>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <p class="eyebrow">Sıfırdan proje yapmayı öğren</p>
+          <h1 id="hero-title">Bir fikri seç, proje planına dönüştür, ilk adımı hemen gör.</h1>
+          <p>
+            Bu uygulama rastgele fikir vermez. Seçimlerine göre hedef, özellik, veri modeli,
+            ekran taslağı ve ilk görevleri olan uygulanabilir mini projeler oluşturur.
+          </p>
+        </div>
+        <aside class="hero-card" aria-label="Proje olgunluk skoru">
+          <span>Hazırlık skoru</span>
+          <strong id="readinessScore">82</strong>
+          <p id="readinessText">Net konu + net kullanıcı = başlanabilir proje.</p>
+        </aside>
+      </section>
+
+      <section class="reactor-grid" id="reactor" data-tip="Form girdileri uygulamanın state değerlerini oluşturur. JavaScript bu değerleri okuyup proje fikrine dönüştürür.">
+        <form class="panel input-panel" id="ideaForm">
+          <div class="section-title">
+            <p class="eyebrow">Adim 1</p>
+            <h2>Proje girdilerini seç</h2>
+          </div>
+
+          <label>
+            Konu
+            <input id="topicInput" value="öğrenciler için odaklanma" maxlength="80" aria-describedby="topicError" />
+            <span class="field-error" id="topicError"></span>
+          </label>
+          <button class="secondary-button" id="inspireButton" type="button">Rastgele ilham konusu</button>
+
+          <div class="two-col">
+            <label>
+              Hedef kitle
+              <select id="audienceSelect">
+                <option>Öğrenciler</option>
+                <option>Öğretmenler</option>
+                <option>Freelancerlar</option>
+                <option>Küçük işletmeler</option>
+                <option>Yazılım öğrenenler</option>
+              </select>
+            </label>
+            <label>
+              Zorluk
+              <select id="levelSelect">
+                <option value="starter">Başlangıç</option>
+                <option value="middle" selected>Orta</option>
+                <option value="advanced">İleri</option>
+              </select>
+            </label>
+          </div>
+
+          <fieldset>
+            <legend>Uygulama tarzi</legend>
+            <label><input type="radio" name="style" value="dashboard" checked /> Dashboard</label>
+            <label><input type="radio" name="style" value="game" /> Oyunlaştırılmış</label>
+            <label><input type="radio" name="style" value="journal" /> Günlük / takip</label>
+          </fieldset>
+
+          <button class="primary-button" type="submit">Fikri üret</button>
+        </form>
+
+        <section class="panel result-panel" aria-live="polite">
+          <div class="section-title">
+            <p class="eyebrow">Adim 2</p>
+            <h2 id="projectTitle">Odak Pusulasi</h2>
+          </div>
+          <p id="projectPitch" class="pitch"></p>
+          <div class="tag-row" id="tagRow"></div>
+          <div class="feature-list" id="featureList"></div>
+          <div class="action-row">
+            <button class="secondary-button" id="saveIdeaButton" type="button">Fikri kaydet</button>
+            <button class="secondary-button" id="copyReadmeButton" type="button">README taslağı kopyala</button>
+            <button class="secondary-button" id="previewReadmeButton" type="button">README önizle</button>
+            <button class="secondary-button" id="compareButton" type="button">3 alternatif üret</button>
+            <button class="secondary-button" id="shareLinkButton" type="button">Paylaşım linki</button>
+          </div>
+          <p class="status-text" id="actionStatus">Üretilen fikir burada işlenebilir.</p>
+        </section>
+      </section>
+
+      <section class="plan" id="plan" data-tip="Plan kartları currentProject.plan dizisinden render edilir. Her kart aynı şablondan gelir.">
+        <div class="section-title">
+          <p class="eyebrow">Adim 3</p>
+          <h2>İlk sprint planı</h2>
+        </div>
+        <div class="plan-grid" id="planGrid"></div>
+      </section>
+
+      <section class="tasks" id="tasks" data-tip="Görev panosu her plana done durumu ekler. Checkbox değişince progress yeniden hesaplanır.">
+        <div class="section-title">
+          <p class="eyebrow">Adım 4</p>
+          <h2>MVP görev panosu</h2>
+        </div>
+        <div class="task-board panel">
+          <div class="task-progress">
+            <span id="taskProgressLabel">0% tamamlandı</span>
+            <b class="score-track" aria-hidden="true"><i id="taskProgressBar" style="--score-width: 0%"></i></b>
+          </div>
+          <div class="task-list" id="taskList"></div>
+        </div>
+      </section>
+
+      <section class="stats" id="stats" data-tip="Özet kartları mevcut state değerlerinden türetilir. Asıl veri değişmez; sadece metrikler hesaplanır.">
+        <div class="section-title">
+          <p class="eyebrow">Adım 5</p>
+          <h2>Proje özeti</h2>
+        </div>
+        <div class="stats-grid" id="statsGrid"></div>
+      </section>
+
+      <section class="compare" id="compare" data-tip="Alternatifler bir array içinde tutulur. map ile kartlara dönüştürülür ve seçilen kart ana projeye taşınır.">
+        <div class="section-title">
+          <p class="eyebrow">Adım 5</p>
+          <h2>Alternatifleri karşılaştır</h2>
+        </div>
+        <div class="compare-grid" id="compareGrid">
+          <p class="empty-state">Henüz alternatif yok. Bir fikir üretip “3 alternatif üret” düğmesine bas.</p>
+        </div>
+      </section>
+
+      <section class="saved" id="saved" data-tip="Kayıtlar localStorage içinde saklanır. Favori, silme ve yükleme işlemleri aynı veri listesini günceller.">
+        <div class="section-title">
+          <p class="eyebrow">Adım 6</p>
+          <h2>Kayıtlı fikirler</h2>
+        </div>
+        <div class="saved-tools">
+          <label class="search-box">
+            Kayıtlarda ara
+            <input id="savedSearchInput" type="search" placeholder="Proje adı, açıklama veya etiket..." />
+          </label>
+          <label class="filter-check">
+            <input id="favoriteOnlyInput" type="checkbox" />
+            Sadece favoriler
+          </label>
+          <button class="secondary-button" id="exportIdeasButton" type="button">JSON dışa aktar</button>
+          <button class="secondary-button" id="undoDeleteButton" type="button" disabled>Son silineni geri al</button>
+          <label class="file-button">
+            JSON içe aktar
+            <input id="importIdeasInput" type="file" accept="application/json,.json" />
+          </label>
+        </div>
+        <div class="saved-grid" id="savedGrid"></div>
+      </section>
+
+      <section class="learn" id="learn" data-tip="Bu bölüm proje boyunca öğrendiğin HTML, CSS ve JavaScript kavramlarını kısa notlara çevirir.">
+        <div class="section-title">
+          <p class="eyebrow">Adım 7</p>
+          <h2>Bugün ne öğrendik?</h2>
+        </div>
+        <div class="learn-grid">
+          <article>
+            <strong>HTML</strong>
+            <p>Sayfanın iskeleti: form, bölümler, başlıklar ve sonuç alanları.</p>
+          </article>
+          <article>
+            <strong>CSS</strong>
+            <p>Görünüm: grid, renkler, kartlar, responsive davranış ve okunabilirlik.</p>
+          </article>
+          <article>
+            <strong>JavaScript</strong>
+            <p>Davranış: kullanıcı seçimlerini okuma, veri üretme ve ekrana yazma.</p>
+          </article>
+        </div>
+        <div class="quiz-panel panel">
+          <div class="section-title">
+            <p class="eyebrow">Mini quiz</p>
+            <h2 id="quizQuestion">Soru yükleniyor</h2>
+          </div>
+          <div class="quiz-options" id="quizOptions"></div>
+          <p class="status-text" id="quizFeedback">Bir cevap seç.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Fikir Reaktörü</span>
+      <a href="../">Ana portala dön</a>
+    </footer>
+
+    <div class="toast-stack" id="toastStack" aria-live="polite" aria-label="Bildirimler"></div>
+
+    <section class="preview-panel" id="readmePreview" hidden aria-labelledby="previewTitle">
+      <div class="preview-card">
+        <div class="preview-header">
+          <div>
+            <p class="eyebrow">README taslağı</p>
+            <h2 id="previewTitle">Proje dokümanı önizleme</h2>
+          </div>
+          <button class="icon-button" id="closePreviewButton" type="button" aria-label="Önizlemeyi kapat">×</button>
+        </div>
+        <pre id="readmePreviewText"></pre>
+      </div>
+    </section>
+
+    <section class="command-panel" id="commandPanel" hidden aria-labelledby="commandTitle">
+      <div class="command-card">
+        <div class="preview-header">
+          <div>
+            <p class="eyebrow">Komut paleti</p>
+            <h2 id="commandTitle">Hızlı işlem seç</h2>
+          </div>
+          <button class="icon-button" id="closeCommandButton" type="button" aria-label="Komut paletini kapat">×</button>
+        </div>
+        <input id="commandSearchInput" type="search" placeholder="Komut ara: kaydet, tema, README..." />
+        <div class="command-list" id="commandList"></div>
+      </div>
+    </section>
+
+    <script src="app.js"></script>
+  </body>
+</html>
