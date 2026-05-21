@@ -1,0 +1,8 @@
+merhaba dunya
+bugun kendi kucuk dil modelimi egitiyorum
+tokenizer metni sayilara cevirir
+transformer baglama bakarak siradaki tokeni tahmin eder
+attention hangi tokenlerin onemli oldugunu ogrenmeye calisir
+loss modelin ne kadar yanildigini gosterir
+optimizer agirliklari kucuk adimlarla duzeltir
+mini gpt once kucuk veriyle baslar sonra daha buyuk veriye hazir olur
