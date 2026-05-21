@@ -43,7 +43,13 @@ loss: modelin yanilma miktari
 .\.venv\Scripts\python.exe -m src.lesson_02_embeddings
 ```
 
-## 6. Mini egitim yap
+## 6. Self-attention dersini calistir
+
+```powershell
+.\.venv\Scripts\python.exe -m src.lesson_03_attention
+```
+
+## 7. Mini egitim yap
 
 Hizli deneme:
 
@@ -57,13 +63,13 @@ Daha uzun deneme:
 .\.venv\Scripts\python.exe -m src.train --data data/turkce-mini.txt --out-dir checkpoints/turkce-mini --max-iters 300
 ```
 
-## 7. Metin uret
+## 8. Metin uret
 
 ```powershell
 .\.venv\Scripts\python.exe -m src.generate --checkpoint checkpoints/turkce-mini --prompt "m" --tokens 120
 ```
 
-## 8. GitHub'a gonder
+## 9. GitHub'a gonder
 
 Repo kok klasorune don:
 

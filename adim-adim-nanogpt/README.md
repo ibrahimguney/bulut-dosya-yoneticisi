@@ -60,11 +60,13 @@ adim-adim-nanogpt/
 2. `src/lesson_01_next_token.py`
 3. `docs/05-embedding-nedir.md`
 4. `src/lesson_02_embeddings.py`
-5. `src/tokenizer.py`
-6. `src/model.py` icindeki `CausalSelfAttention`
-7. `src/model.py` icindeki `Block`
-8. `src/train.py` icindeki `get_batch`
-9. `src/generate.py`
+5. `docs/06-self-attention.md`
+6. `src/lesson_03_attention.py`
+7. `src/tokenizer.py`
+8. `src/model.py` icindeki `CausalSelfAttention`
+9. `src/model.py` icindeki `Block`
+10. `src/train.py` icindeki `get_batch`
+11. `src/generate.py`
 
 Ilk dersi calistir:
 
@@ -76,6 +78,12 @@ Ikinci dersi calistir:
 
 ```powershell
 .\.venv\Scripts\python.exe -m src.lesson_02_embeddings
+```
+
+Ucuncu dersi calistir:
+
+```powershell
+.\.venv\Scripts\python.exe -m src.lesson_03_attention
 ```
 
 ## Sonraki adimlar
