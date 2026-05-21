@@ -37,7 +37,13 @@ loss: modelin yanilma miktari
 .\.venv\Scripts\python.exe -m unittest discover tests
 ```
 
-## 5. Mini egitim yap
+## 5. Embedding dersini calistir
+
+```powershell
+.\.venv\Scripts\python.exe -m src.lesson_02_embeddings
+```
+
+## 6. Mini egitim yap
 
 Hizli deneme:
 
@@ -51,13 +57,13 @@ Daha uzun deneme:
 .\.venv\Scripts\python.exe -m src.train --data data/turkce-mini.txt --out-dir checkpoints/turkce-mini --max-iters 300
 ```
 
-## 6. Metin uret
+## 7. Metin uret
 
 ```powershell
 .\.venv\Scripts\python.exe -m src.generate --checkpoint checkpoints/turkce-mini --prompt "m" --tokens 120
 ```
 
-## 7. GitHub'a gonder
+## 8. GitHub'a gonder
 
 Repo kok klasorune don:
 
